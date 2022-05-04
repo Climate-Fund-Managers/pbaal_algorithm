@@ -1,10 +1,7 @@
-import argparse
 import logging
 import os
 import random
 import sys
-from dataclasses import dataclass, field
-from typing import Optional
 import datasets
 import numpy as np
 import torch
@@ -15,7 +12,6 @@ from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
     AutoTokenizer,
-    DataCollatorWithPadding,
     EvalPrediction,
     HfArgumentParser,
     PretrainedConfig,
@@ -28,44 +24,58 @@ from transformers import (
 )
 
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.utils import check_min_version
-from transformers.utils.versions import require_version
 from transformers.adapters import CompacterConfig
 import yaml
 import DataTrainingArguments
 import ModelArguments
 
 
-class TransformerWithAdapters(object):
+class AdapterDropTrainerCallback(TrainerCallback):
 
-    def __init__(self, arguments: object):
+    def __init__(self, adapter_name):
+        self.adapter_name = adapter_name
+
+    def on_step_begin(self, args, state, control, **kwargs):
+        skip_layers = list(range(np.random.randint(0, 11)))  # TO CHANGE
+        kwargs['model'].set_active_adapters(self.adapter_name, skip_layers=skip_layers)
+
+    def on_evaluate(self, args, state, control, **kwargs):
+        # Deactivate skipping layers during evaluation (otherwise it would use the
+        # previous randomly chosen skip_layers and thus yield results not comparable
+        # across different epochs)
+        kwargs['model'].set_active_adapters(self.adapter_name, skip_layers=None)
+
+
+class TransformerWithAdapters:
+    # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
+
+    def __init__(self, args):
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
-        self.adapter_info = {"adapter_name": "compacter", "adapter_config": CompacterConfig()}
         self.logger = logging.getLogger(__name__)
 
-        random.seed(arguments['random_seed'])
+        random.seed(args['random_seed'])
 
         self.hf_args = {
-            "model_name_or_path": arguments['model_name_or_path'],
-            "task_name": arguments['task_name'],
-            "do_train": arguments['do_train'],
-            "do_eval": arguments['do_eval'],
-            "max_seq_length": arguments['max_seq_length'],
-            "per_device_train_batch_size": arguments['per_device_train_batch_size'],
-            "per_device_eval_batch_size": arguments['per_device_eval_batch_size'],
-            "learning_rate": arguments['learning_rate'],
-            "overwrite_output_dir": arguments['overwrite_output_dir'],
-            "output_dir": arguments['output_dir'] + arguments['task_name'] + "/",
-            "logging_strategy": arguments['logging_strategy'],
-            "logging_steps": arguments['logging_steps'],
-            "evaluation_strategy": arguments['evaluation_strategy'],
-            "eval_steps": arguments['eval_steps'],
-            "seed": arguments['seed'],
-            "max_steps": arguments['max_steps'],
+            "model_name_or_path": args['model_name_or_path'],
+            "task_name": args['task_name'],
+            "do_train": args['do_train'],
+            "do_eval": args['do_eval'],
+            "max_seq_length": args['max_seq_length'],
+            "per_device_train_batch_size": args['per_device_train_batch_size'],
+            "per_device_eval_batch_size": args['per_device_eval_batch_size'],
+            "learning_rate": args['learning_rate'],
+            "overwrite_output_dir": args['overwrite_output_dir'],
+            "output_dir": args['output_dir'] + args['task_name'] + "/",
+            "logging_strategy": args['logging_strategy'],
+            "logging_steps": args['logging_steps'],
+            "evaluation_strategy": args['evaluation_strategy'],
+            "eval_steps": args['eval_steps'],
+            "seed": args['seed'],
+            "max_steps": args['max_steps'],
             # The next line is important to ensure the dataset labels are properly passed to the model
-            "remove_unused_columns": arguments['remove_unused_columns'],
-            "num_train_epochs": arguments['num_train_epochs']
+            "remove_unused_columns": args['remove_unused_columns'],
+            "num_train_epochs": args['num_train_epochs']
 
         }
 
@@ -73,31 +83,31 @@ class TransformerWithAdapters(object):
         # Using max_steps instead of train_epoch since we want all experiment to train for the same
         # number of iterations.
 
-        if arguments['use_tensorboard']:
+        if args['use_tensorboard']:
             self.self.hf_args.update(
                 {
-                    "logging_dir": "/tmp/" + arguments['task_name'] + "/tensorboard",
+                    "logging_dir": "/tmp/" + args['task_name'] + "/tensorboard",
                     "report_to": "tensorboard",
                 }
             )
 
-        self.raw_datasets = load_dataset(arguments['type_file'],
-                                         data_files={'train': arguments['train_file'],
-                                                     'validation_matched': arguments['validation_file'],
-                                                     'test_matched': arguments['test_file']})
+        self.raw_datasets = load_dataset(args['type_file'],
+                                         data_files={'train': args['train_file'],
+                                                     'validation_matched': args['validation_file'],
+                                                     'test_matched': args['test_file']})
 
-        if arguments['adapter_config'] == 'default':
+        if args['adapter_config'] == 'default':
             self.adapter_config = CompacterConfig()
         else:
             # TO BE ADJUSTED LATER
             pass
 
-        self.use_adapters = arguments['use_adapters']
-        self.adapter_name = arguments['adapter_name']
-        self.adaptive_learning = arguments['adaptive_learning']
-        self.target_score = arguments['target_score']
-        self.initial_train_dataset_size = arguments['initial_train_dataset_size']
-        self.query_samples_count = arguments['query_samples_count']
+        self.use_adapters = args['use_adapters']
+        self.adapter_name = args['adapter_name']
+        self.adaptive_learning = args['adaptive_learning']
+        self.target_score = args['target_score']
+        self.initial_train_dataset_size = args['initial_train_dataset_size']
+        self.query_samples_count = args['query_samples_count']
 
     def run_active_learning(self):
 
@@ -153,6 +163,7 @@ class TransformerWithAdapters(object):
         return samples_entropy
 
     def __train(self):
+        global train_dataset
         parser = HfArgumentParser(
             (ModelArguments, DataTrainingArguments, TrainingArguments))
 
@@ -396,7 +407,7 @@ class TransformerWithAdapters(object):
             )
 
         if self.adaptive_learning:
-            trainer.add_callback(self.AdapterDropTrainerCallback())
+            trainer.add_callback(AdapterDropTrainerCallback(self.adapter_name))
 
         # define number of samples either as length of dataset or max_train_samples if performing tests
         max_train_samples = (
