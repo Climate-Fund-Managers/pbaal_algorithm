@@ -1,4 +1,4 @@
-transformers==4.18.0
-datasets==2.1.0
-scikit-learn==1.0.2
-adapter-transformers==3.0.0
+transformers==4.10.1
+datasets==1.6.1
+scikit-learn==1.0
+adapter-transformers==2.3.0
