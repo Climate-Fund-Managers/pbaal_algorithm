@@ -6,7 +6,7 @@ import datasets
 import numpy as np
 import torch
 import transformers
-from datasets import concatenate_datasets, load_dataset, load_metric
+from datasets import concatenate_datasets, load_dataset, load_metric,Features, Value, ClassLabel
 from scipy.stats import entropy
 from transformers import (
     AutoConfig,
@@ -26,8 +26,77 @@ from transformers import (
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.adapters import CompacterConfig
 import yaml
-import DataTrainingArguments
-import ModelArguments
+from dataclasses import dataclass, field
+from typing import Optional
+
+
+@dataclass
+class ModelArguments:
+    """
+    Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
+
+    """
+
+    # Path to pretrained model or model identifier from huggingface.co/models
+    model_name_or_path: str = field(default=None)  # microsoft/mpnet-base
+
+    # Pretrained config name or path if not the same as model_name
+    config_name: Optional[str] = field(default=None)
+
+    # Pretrained tokenizer name or path if not the same as model_name
+    tokenizer_name: Optional[str] = field(default=None)
+
+    # Where do you want to store the pretrained models downloaded from huggingface.co
+    cache_dir: str = field(default=None)
+
+    # Whether to use one of the fast tokenizer (backed by the tokenizers' library) or not
+    use_fast_tokenizer: bool = field(default=True)
+
+    # Will use the token generated when running `transformers-cli login`
+    # (necessary to use this script with private models)
+    use_auth_token: bool = field(default=False)
+
+
+@dataclass
+class DataTrainingArguments:
+    """
+    Arguments relating to what data we are going to use in the model for
+    training and eval.
+
+    """
+    # The name of the task to train on
+    task_name: str = field(default='mnli')
+
+    # The maximum total input sequence length after tokenization
+    max_seq_length: int = field(default=512)  # this in line with mpnet
+
+    # Whether to overwrite the cached preprocessed datasets
+    overwrite_cache: bool = field(default=False)
+
+    # Whether to pad all samples to max_seq_length
+    pad_to_max_length: bool = field(default=True)
+
+    # For debugging purposes or quicker training, truncate the number of
+    # training examples to this value if set
+    max_train_samples: Optional[int] = field(default=None)
+
+    # For debugging purposes or quicker training, truncate the number of
+    # evaluation examples to this value if set
+    max_eval_samples: Optional[int] = field(default=None)
+
+    # For debugging purposes or quicker training, truncate the number of
+    # prediction examples to this value if set
+    max_predict_samples: Optional[int] = field(default=None)
+
+    # A csv or a json file containing the training data
+    train_file: str = field(default=None)
+
+    # A csv or a json file containing the validation data
+    validation_file: str = field(default=None)
+
+    # A csv or a json file containing the test data
+    test_file: str = field(default=None)
+
 
 
 class AdapterDropTrainerCallback(TrainerCallback):
@@ -91,10 +160,17 @@ class TransformerWithAdapters:
                 }
             )
 
+        features = Features({'hypothesis': Value(dtype='string', id=None),
+                             'idx': Value(dtype='int64', id=None),
+                             'label': ClassLabel(num_classes=3, names=['entailment', 'neutral', 'contradiction'],
+                                                 id=None),
+                             'premise': Value(dtype='string', id=None)})
+
         self.raw_datasets = load_dataset(args['type_file'],
                                          data_files={'train': args['train_file'],
                                                      'validation_matched': args['validation_file'],
-                                                     'test_matched': args['test_file']})
+                                                     'test_matched': args['test_file']},
+                                         features=features)
 
         if args['adapter_config'] == 'default':
             self.adapter_config = CompacterConfig()
