@@ -84,7 +84,7 @@ class TransformerWithAdapters:
         # number of iterations.
 
         if args['use_tensorboard']:
-            self.self.hf_args.update(
+            self.hf_args.update(
                 {
                     "logging_dir": "/tmp/" + args['task_name'] + "/tensorboard",
                     "report_to": "tensorboard",
@@ -482,7 +482,7 @@ class TransformerWithAdapters:
 
 
 if __name__ == "__main__":
-    file_location = sys.argv[0]
+    file_location = sys.argv[1]
 
     with open(file_location) as f:
         arguments = yaml.safe_load(f)
