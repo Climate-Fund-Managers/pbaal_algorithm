@@ -308,7 +308,7 @@ class TransformerWithAdapters:
             num_labels=num_labels,
             finetuning_task=data_args.task_name,
             cache_dir=model_args.cache_dir,
-            revision=model_args.model_revision,
+            # revision=model_args.model_revision,
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
@@ -318,7 +318,7 @@ class TransformerWithAdapters:
             else model_args.model_name_or_path,
             cache_dir=model_args.cache_dir,
             use_fast=model_args.use_fast_tokenizer,
-            revision=model_args.model_revision,
+            # revision=model_args.model_revision,
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
@@ -327,7 +327,7 @@ class TransformerWithAdapters:
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
             cache_dir=model_args.cache_dir,
-            revision=model_args.model_revision,
+            # revision=model_args.model_revision,
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
