@@ -209,8 +209,8 @@ class TransformerWithAdapters:
 
         while unlabeled_dataset.num_rows > 0 and current_score < self.target_score:
 
-            self.hf_args["max_steps"] = (self.raw_datasets['train'].num_rows / self.hf_args[
-                'per_device_train_batch_size']) * self.hf_args['num_train_epochs']
+            self.hf_args["max_steps"] = np.floor((self.raw_datasets['train'].num_rows / self.hf_args[
+                'per_device_train_batch_size']) * self.hf_args['num_train_epochs']).astype(int)
 
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
