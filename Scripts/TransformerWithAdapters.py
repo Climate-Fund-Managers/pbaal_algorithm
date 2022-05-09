@@ -147,7 +147,7 @@ class TransformerWithAdapters:
 
         }
 
-        # 684 = (5476 (samples) / 32 (batch size)) *  4 epochs
+        # e.g 684 = (5476 (samples) / 32 (batch size)) *  4 epochs
         # Using max_steps instead of train_epoch since we want all experiment to train for the same
         # number of iterations.
 
@@ -176,8 +176,6 @@ class TransformerWithAdapters:
         else:
             # TO BE ADJUSTED LATER
             pass
-
-        self.hf_args.update({"num_train_epochs": self.raw_datasets['']})
 
         self.use_adapters = args['use_adapters']
         self.adapter_name = args['adapter_name']
