@@ -144,7 +144,7 @@ Water pumping,Promote the use of hydraulic ramp pumps.,1,4905
 Supply of agricultural machinery/equipment,Establishment of a livestock fodder factory.,0,3957
 Water transport,Water saving devices (efficient irrigation systems).,0,5203
 Ozone layer preservation,Reduce methane emissions from anaerobic decomposing of organic matter by composting and reduce waste generation by recycling.,0,3189
-Non-renewable waste-fired electric power plants,"Diversify energy sources (solar, wind, biogas).",-1,2934
+Non-renewable waste-fired electric power plants,"Diversify energy sources (solar, wind, biogas).",2,2934
 Use of solids and liquids produced from biomass for direct power generation,Use of sludge from waste: waste water treatment plant as forest bio-stabilizer.,1,4520
 "Rural water supply schemes using handpumps, spring catchments, gravity-fed systems, rainwater collection and fog harvesting, storage tanks, small distribution systems typically with shared connections/points of use","Water: establish borehole irrigation, rainfall and water catchment basis to enhance communal water storage systems and to supplement rainfed agriculture. Improve already poor designs for water storage. Plant trees around water storages, raising awareness and capacity building.",1,3725
 "Motor vehicles, motor passenger cars and aircraft building","Build capacity with weather forecasting, data analysis and equipment maintenance.",0,2606
@@ -427,7 +427,7 @@ Ocean water desalination,The acidification of the ocean will continue to increas
 Railroad equipment building,Promote energy-saving technologies in industry and the construction sector.,0,3466
 "Large scale transmission, conveyance and distribution water systems",Large networks of power lines for transmission and distribution services coverage.,0,2334
 Wastewater treatment facilities,Recycling of ghg Emissions from Wastewater Treatment Plants.,1,4788
-Non-renewable waste-fired electric power plants,Rehabilitation of the power plant would reestablish the generation of hydropower of 4.6 MW. The plant would provide electricity for communities in Middle and Lower Juba Valley.,-1,2966
+Non-renewable waste-fired electric power plants,Rehabilitation of the power plant would reestablish the generation of hydropower of 4.6 MW. The plant would provide electricity for communities in Middle and Lower Juba Valley.,2,2966
 Agricultural water resources,"For both crops and livestock enhanced water availability, use of appropriate agricultural technologies and enhanced soil and water conservation methods will be employed.",1,300
 Atmospheric water generation,Creasing the water-holding capacity of reservoirs in anticipation of increased abstraction and increased evaporation.,0,459
 Decentralized water treatment,Policies to increase efficiency of other water type use and supply mechanisms for example improving infrastructure.,0,1447
@@ -484,7 +484,7 @@ Decentralized water distribution,"Seek alternatives so that different institutio
 Shipbuilding,Flood and submersion of craft embarkations in the high sea.,0,3807
 Supply of seeds for agricultural use,Promote simple technologies for the processing and conservation of food and seeds.,1,4114
 Flood prevention and control,Objective: To reduce flood damage and casualties.,1,1797
-Non-renewable waste-fired electric power plants,Urgent completion of waste-to-energy feasibility studies at all levels of society.,-1,2979
+Non-renewable waste-fired electric power plants,Urgent completion of waste-to-energy feasibility studies at all levels of society.,2,2979
 Decentralized water treatment,Increase the efficiency of municipal and industrial water supply systems.,0,1441
 Supply of seeds for agricultural use,Farmers use low quality varieties low production).,1,4101
 Basic drinking water supply,Guidelines for resilient drinking water supplies and sanitation.,1,5335
@@ -523,7 +523,7 @@ Atmospheric water generation,Adopt ecosystem-based approach to manage water reso
 Solid waste to electricity generation,Municipal solid waste generation per capita assumed to grow consistent with population growth.,1,5417
 Biosphere protection,Encourage establishment of protected areas to ensure sustainability of terrestrial and marine resources.,1,754
 Fishing boats building,Develop and transfer new fishing techniques.,0,1737
-Non-renewable waste-fired electric power plants,Sustainable small-scale energy installations in rural areas.,-1,2971
+Non-renewable waste-fired electric power plants,Sustainable small-scale energy installations in rural areas.,2,2971
 "Rural water supply schemes using handpumps, spring catchments, gravity-fed systems, rainwater collection and fog harvesting, storage tanks, small distribution systems typically with shared connections/points of use","The objective of the project is to increase water availability for domestic and commercial use through  sensitization  of  communities  about  the  possibility  of  capturing,  storing  and utilizing rainwater.",1,3714
 Wastewater to electricity generation,Improve efficiency of industrial energy water raw materials.,1,5449
 Navigation or guidance systems building,Training project and introduce navigation new technology and fishing equipment for fishermen.,1,2920
@@ -622,7 +622,7 @@ Large scale sewerage including trunk sewers and sewage pumping stations,"Feasibi
 Afforestation for desertification control,Adoption of efficient management of irrigated areas.,0,1
 "Solid waste treatment, waste to production, recycling and recovery facilities",Waste: Solid waste landfills; industrial wastewater; Domestic wastewater; Human waste; Waste incineration.,1,3931
 "Supply of industrial crops/export crops (including sugar; coffee, cocoa, tea; oil seeds, nuts, kernels; fibre crops; tobacco; rubber)","Procure agricultural supplies (seeds, tools) for active household farmers.",1,5426
-Ground-water abstraction,Extend solutions for recharging the ground layers of water.,-1,1951
+Ground-water abstraction,Extend solutions for recharging the ground layers of water.,2,1951
 Bulk water supply,High price of water supply service.,1,935
 Wastewater to electricity generation,Improve water supply through wastewater collection and treatment systems.,0,4738
 Municipal and industrial solid waste composting and reuse,"Development of solid urban waste management systems, including improvements in the treatment and final disposal systems. This development includes the extension of capture and burning of CH4 systems and or the introduction of technologies to reduce CH4 generation to new final disposal sites, so that NUMBER of the urban solid waste is disposed of in sites with these technologies.",0,2720
@@ -634,11 +634,11 @@ Basic drinking water supply,Availability of potable water for using and drinking
 Recycling and recovery facilities,"Seek to provide proper waste management coverage with waste segregation, recycling, and treatment in sanitary landfills) for at least NUMBER of the more vulnerable municipalities by NUMBER including: implementing educational programs for the separation of basic waste types by households and waste producers; planning and building NUMBER waste collection and recycling facilities andor general drop off points by 2025; planning and building at least NUMBER landfill equipped with gas-to-energy systems by NUMBER and developing stand-alone bio-energy solutions.",1,3534
 Fish stock protection,Pilot investments to support affected ecosystems (Fisheries).,1,1695
 Supply of seeds for agricultural use,"Production of olives, grapes, stone fruits, rain-fed vegetables and field crops.",0,4112
-Non-renewable waste-fired electric power plants,Double energy efficiency improvement to number in power plants.,-1,2936
+Non-renewable waste-fired electric power plants,Double energy efficiency improvement to number in power plants.,2,2936
 Waste management and disposal,Landfill ch4 recovery; waste incineration with energy recovery; composting of organic waste; controlled wastewater treatment; recycling and waste minimisation.,1,4600
 Supply of seeds for agricultural use,Construction of grain banks and seeds.,1,4089
 Energy production and electricity generation from landfill gas capture,Capture landfill gases for use in power generation.,1,1576
-"Conservation and rehabilitation of inland surface waters (rivers, lakes etc.), ground water and coastal waters","On the other hand, the land based activities in coastal cities such as the manufacturing of raw-material along regional rivers, are lowering water levels and increasing sediment content, which is contributing significantly to the reduction of water quality and quantity.",-1,1111
+"Conservation and rehabilitation of inland surface waters (rivers, lakes etc.), ground water and coastal waters","On the other hand, the land based activities in coastal cities such as the manufacturing of raw-material along regional rivers, are lowering water levels and increasing sediment content, which is contributing significantly to the reduction of water quality and quantity.",2,1111
 "Use of waste-fired power plants making use of biodegradable municipal waste (household waste and waste from companies and public services that resembles household waste, collected at installations specifically designed for their disposal with recovery of combustible liquids, gases or heat)","Waste: the mitigation plan provides for the implementation, from number of a plan to install facilities to transform solid waste into RDF (refuse derived fuel) intended for cement facilities, as well as a programme for introducing degasification systems in controlled landfills. It is planned to recover electricity from captured gases, at least at the main landfills. This energy option is covered in the low-carbon scenario for the energy sector.",1,4578
 Afforestation for industrial and rural consumption,"Targeting afforestation and re-afforestation programmes to control siltation and the provision of fuel wood, and for their benefits, such as sources of alternative cash income.",1,213
 Biosphere protection,Protected area by effects of climate change and adjustment of management to protect that area from these impacts.,1,778
@@ -649,7 +649,7 @@ Integrated fishery projects,Adopt eco-system services approach in the management
 Natural reserves and actions in the surrounding areas,Reservation of un-reserved forest areas of national importance.,1,2848
 Water resources conservation,Strengthen management of water resource during drought.,1,4971
 "Sustainable management of wetland (including peatlands, marshes, deltas, floodplains) and riverine ecosystems",Itiating integrated wetland management in terai.,1,4148
-Sustainable solutions for ports,Port liquefied petroleum gas to increase its share in the industrial sector.,-1,4331
+Sustainable solutions for ports,Port liquefied petroleum gas to increase its share in the industrial sector.,2,4331
 Electric power plants that use non-biodegradable industrial and municipal waste as the energy source.,Waste processing plants in large urban centres.,0,1567
 Afforestation for industrial and rural consumption,Community planting afforestation reforestation and planting in irrigated agricultural areas in support of climate mitigation.,0,165
 Water transport,Displaced ground and surface freshwater supplies by saline water.,0,5163
@@ -688,8 +688,8 @@ Municipal and industrial solid waste management (including hazardous and toxic w
 "Port infrastructure for off-shore wind farm assembly, load-out and servicing",Carriacou: undertake shoreline and cliff stabilisation to project public infrastructure of socio-economic importance in windward.,0,3224
 Ballast Water Treatment,"Conduct  feasibility  study  for  the  reuse  of  grey-water  from  mosques  for irrigating landscapes  in three  critically  water  scarce  cities  (Taiz,   Sanaa and Haja).",0,526
 Water supply pumping stations,The inputs in this project will be: Technical expertise in the different areas of development of water collection systems and water collection points.,0,5133
-Non-renewable waste-fired electric power plants,Pursuing a waste management strategy that includes the conversion of waste to energy.,-1,2963
-Non-renewable waste-fired electric power plants,"Increasing the use of grid-connected grid renewable technologies with fuel sources such as waste, solar, bagasse (from the sugar industry) and wood chips.",-1,2946
+Non-renewable waste-fired electric power plants,Pursuing a waste management strategy that includes the conversion of waste to energy.,2,2963
+Non-renewable waste-fired electric power plants,"Increasing the use of grid-connected grid renewable technologies with fuel sources such as waste, solar, bagasse (from the sugar industry) and wood chips.",2,2946
 Air pollution control,"Moving towards environmentally sustainable transport system: Promotion of public transport system and bicycle use, introduction of fuel tax used in Kathmandu Valley for air quality improvement and further promotion of non-motorised transport would contribute to the reduction of pollution in urban areas.",1,377
 "Solid waste treatment, waste to production, recycling and recovery facilities",Improved waste management through composting and recycling of waste.,1,3899
 Electric power plants that use non-biodegradable industrial and municipal waste as the energy source.,"The water, the electricity and the firewood are very badly managed in stp. relatively to the water, a great waste exists, namely in the public fountains. As for the electricity, a lot of fraud exists. Regarding to firewood, that is the type of older energy, it is wasted. Therefore, the use of new technologies and the improvement of management will allow sustainable management of those resources.",0,1559
@@ -723,7 +723,7 @@ Biosphere protection,Review customs and quarantine sector and operational plans 
 Use of solids and liquids produced from biomass for direct power generation,"Photovoltaic generators, wind facilities; biomass heated facilities used.",1,4507
 Food crop production,Specific objectives: creasing and diversifying agricultural production and productivity; e Establishing food processing and preservation plants; e Addressing the issue of infrastructural deficits; Reducing demand and supply disequilibria of traded products; Making agriculture a profitable economic activity.,1,1855
 Water treatment facilities,"Apply integrated management of water resources, including surface water, groundwater and wastewater.",0,5209
-Ground-water abstraction,"Rising sea-levels, however, will lead to salt-water intrusion into groundwater supplies particularly as existing water levels decrease. Ground water supplies will be particularly vulnerable to saline intrusion during the dry season as a result of low water volumes in river systems. Furthermore, regardless of the quantity of water available increased temperatures from climate change will increase evaporation rates, raising the concentration of dissolved salts in the water often deeming it unsuitable for drinking purposes .",-1,1980
+Ground-water abstraction,"Rising sea-levels, however, will lead to salt-water intrusion into groundwater supplies particularly as existing water levels decrease. Ground water supplies will be particularly vulnerable to saline intrusion during the dry season as a result of low water volumes in river systems. Furthermore, regardless of the quantity of water available increased temperatures from climate change will increase evaporation rates, raising the concentration of dissolved salts in the water often deeming it unsuitable for drinking purposes .",2,1980
 "Port infrastructure for off-shore wind farm assembly, load-out and servicing","Enhance resilience of small-scale wharf, jetty, channel and embarkation infrastructure to enable efficient infrastructure delivery, tourism and provide food security.",0,3233
 Reservoirs and hydraulic structures for agricultural use.,"Water: improved water harvesting techniques, provision of agricultural inputs to local farmers, afforestation, and building capacity are urgently needed. Moreover, additional studies are needed to assess existing groundwater reserves. These would inform the much needed implementation of new water projects (wells and dams) as well as the rehabilitation of existing water sources.",1,3598
 Bulk water supply,Frastructure to guarantee integrated supply with other uses and with water resources planning.,1,933
@@ -778,7 +778,7 @@ Marine pollution control,"On the other hand, agricultural production is affected
 Nutrient extraction,Cleaning and purification of drinking water.,0,2994
 Supply of fertilizers for agricultural use,Facilities and infrastructure for research and development into biological fertilizers improved.,1,3999
 Irrigation  for agricultural use.,Increase the efficiency of irrigation water use and reduce losses.,1,2126
-Non-renewable waste-fired electric power plants,By finalize the technical studies with the intention to construct and operationalize a waste to energy plant by By achieve an energy matrix with of electricity from renewable sources both on and off-grid in the public and private sectors.3 By all remaining wetlands and watershed areas with carbon sequestration potential are protected as carbon sinks.,-1,2926
+Non-renewable waste-fired electric power plants,By finalize the technical studies with the intention to construct and operationalize a waste to energy plant by By achieve an energy matrix with of electricity from renewable sources both on and off-grid in the public and private sectors.3 By all remaining wetlands and watershed areas with carbon sequestration potential are protected as carbon sinks.,2,2926
 "Rural water supply schemes using handpumps, spring catchments, gravity-fed systems, rainwater collection and fog harvesting, storage tanks, small distribution systems typically with shared connections/points of use",To  integrated  macro-and  micro-catchments  for  water  harvesting  within the existing land use system.,1,3717
 Water transport,To construct water reservoirs and water diversion facilities to transfer water resources to dry regions.,1,5196
 Bulk water supply,"Advanced solar powered water supply facilities constructed for pumping water from rivers, streams or ponds for irrigation.",0,906
@@ -827,7 +827,7 @@ Integrated fishery projects,"Fisheries is inevitably a key topic area in nationa
 Water resources conservation,Enhancing conservation  fishery resource management.,0,4943
 Fish stock protection,Investigate agriculture fishing insurance options and new risk transfer instruments and develop respective policies and incentives.,0,1690
 Wastewater to electricity generation,"Expanding electric power generation from geothermal, wind and solar sources to minimize the adverse effects of droughts on predominantly hydroelectric energy sector.",0,4734
-Ground-water abstraction,"The construction of water points without a prior technical study taking into account the countrys hydro-geological complexity faced some problems namely silting, the utilization of materials that were ill adapted to water corrosion, wells exhaustion, salt-water invasion, pollution of ground water due to lack of isolation, and water quality not acceptable to populations.",-1,1985
+Ground-water abstraction,"The construction of water points without a prior technical study taking into account the countrys hydro-geological complexity faced some problems namely silting, the utilization of materials that were ill adapted to water corrosion, wells exhaustion, salt-water invasion, pollution of ground water due to lack of isolation, and water quality not acceptable to populations.",2,1985
 Agricultural water resources,Development of hydro-agricultural resources on which they rely.,1,294
 Electric power plants that use non-biodegradable industrial and municipal waste as the energy source.,"Mainly electricity generation sub-sector but with ancillary mitigation possible in forestry, agriculture, transport and energy efficiency sector wide.",0,1547
 "Harbours and docks, harbour guidance systems, ships and boats",Land and marine planning and management for all islands that provide clear regulations on land development with competent planning authorities strengthened to implement  enforce land and marine use regulatory frameworks and water regulations (see also Strategy 1).,1,2012
@@ -967,7 +967,7 @@ Bulk water supply,Decrease in supply  quality of water.,1,920
 Reservoirs and hydraulic structures for agricultural use.,Three small multi-purpose reservoirs constructed in critical drought areas.,0,3587
 Supply of agricultural machinery/equipment,Establishment of production unit for livestock fodder.,0,3959
 Afforestation for desertification control,"Reduction of soil fertility as a result of increased erosion process, with increased trend of desertification.",0,38
-Non-renewable waste-fired electric power plants,Waste processing plants in large urban centres.,-1,2983
+Non-renewable waste-fired electric power plants,Waste processing plants in large urban centres.,2,2983
 Water supply pumping stations,Solar powered water pumping and purification systems assembled for increasing water quality and quantity at project sites while decreasing energy demands.,1,5463
 "Municipal and industrial solid waste collection, disposal and treatment",Assessing the current situation of solid waste management and develop the national strategy in this regard.,1,2667
 "Port infrastructure for off-shore wind farm assembly, load-out and servicing",Carriacou - undertake shorelinecliff stabilisation to protect public infrastructure of socio-economic importance in windward.,0,3223
@@ -982,7 +982,7 @@ Water resources conservation,Evaluation and planning the water resources.,0,4947
 "Use of biogases from anaerobic fermentation (e.g. landfill gas, sewage sludge gas, fermentation of energy crops and manure) and thermal processes (also known as syngas)",Capture or use of biogas from sanitary landfill.,1,4442
 Brackish ground-water desalination,Displaced ground and surface freshwater supplies by saline water.,1,826
 Electric power plants that use non-biodegradable industrial and municipal waste as the energy source.,Construct controlled landfill for biogas recovery to generate up to 240 GWh of primary energy (95 GWh of electricity) per year.,1,1521
-Non-renewable waste-fired electric power plants,Conversion of sanitary landfill gases into energy (and utilization of biogas).,-1,2930
+Non-renewable waste-fired electric power plants,Conversion of sanitary landfill gases into energy (and utilization of biogas).,2,2930
 "Sustainable protection of wetland (including peatlands, marshes, deltas, floodplains) and riverine ecosystems","The study recommends that, for coastal ecosystems, priority be given to ensuring effective management of protected areas. This would require deployment of management instruments on the coastal zone and in river basins so as to minimize negative impacts on the Marine Zone.",1,4232
 Basic drinking water supply,Satisfaction of drinking water needs for rural and urban populations.,1,628
 Solid waste to electricity generation,Development of waste to energy power projects as envisaged under the NAMA Support projectl with a vision to encourage private sector investment coming to the develoopment. This NAMA Support project is expected to leavrage the private sector investment and create an enabling environment for trigger development of waste to energy power projects in the country.,1,3853
@@ -1058,10 +1058,10 @@ Water transport,"Mass transport in windhoek, car and freight pooling.",0,5180
 "River and other inland water transport, inland barges and vessels","Entification of suitable sites for water harvesting, small scale irrigation dams and boreholes.",0,3629
 Water resources conservation,Conduct impact and adaptation research on water resources.,0,4934
 Nutrient extraction,Providing mineral supplement to improve animal nutrition.,0,3028
-Non-renewable waste-fired electric power plants,Stall waste to energy incinerators to generate up to number gwh of electricity per year.,-1,2969
+Non-renewable waste-fired electric power plants,Stall waste to energy incinerators to generate up to number gwh of electricity per year.,2,2969
 Wastewater to electricity generation,"Wastewater from domestic, tourism, industrial and agricultural use can be reused, for example for agricultural irrigation, reducing demand for drinking water.",0,4766
 Fish stock protection,Short conservation of fish under ice.,1,1708
-Non-renewable waste-fired electric power plants,Low carbon mix of power generation for national grid.,-1,2953
+Non-renewable waste-fired electric power plants,Low carbon mix of power generation for national grid.,2,2953
 Atmospheric water generation,Construction of a national laboratory of water.,0,454
 Basic drinking water supply,Improve and standardise the quality of drinking water.,1,609
 "Sustainable restoration of wetland (including peatlands, marshes, deltas, floodplains) and riverine ecosystems","Rehabilitation and reinstatement of degraded ecosystems, in particular rangeland areas, forests and areas with a high potential for cultivation, to provide sustainable grazing, forestry products, and agriculturally productive zones.",0,4263
