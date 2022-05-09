@@ -20,7 +20,8 @@ from transformers import (
     default_data_collator,
     set_seed,
     AdapterTrainer,
-    TrainerCallback
+    TrainerCallback,
+    AutoAdapterModel
 )
 
 from transformers.trainer_utils import get_last_checkpoint
@@ -96,7 +97,6 @@ class DataTrainingArguments:
 
     # A csv or a json file containing the test data
     test_file: str = field(default=None)
-
 
 
 class AdapterDropTrainerCallback(TrainerCallback):
@@ -322,23 +322,30 @@ class TransformerWithAdapters:
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_args.model_name_or_path,  # microsoft/mpnet-base
-            from_tf=bool(".ckpt" in model_args.model_name_or_path),
-            config=config,
-            cache_dir=model_args.cache_dir,
-            # revision=model_args.model_revision,
-            use_auth_token=True if model_args.use_auth_token else None,
-        )
-
         if self.use_adapters:
+            model = AutoAdapterModel.from_pretrained(
+                model_args.model_name_or_path,  # microsoft/mpnet-base
+                from_tf=bool(".ckpt" in model_args.model_name_or_path),
+                config=config,
+                cache_dir=model_args.cache_dir,
+                # revision=model_args.model_revision,
+                use_auth_token=True if model_args.use_auth_token else None,
+            )
             """CUSTOM CHANGES USING ADAPTERS"""
             # Add a new adapter
             model.add_adapter(self.adapter_name, config=self.adapter_config)
-            # model.train_adapter(adapter_name) # we freeze all transformer parameters except for the parameters of
-            # adapter model.add_classification_head(adapter_name, num_labels=num_labels) # add new classification
-            # head on top since transformer layers are frozen
-            model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
+            model.add_classification_head(self.adapter_name, num_labels=num_labels)
+            model.train_adapter(self.adapter_name)
+            # model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
+        else:
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_args.model_name_or_path,  # microsoft/mpnet-base
+                from_tf=bool(".ckpt" in model_args.model_name_or_path),
+                config=config,
+                cache_dir=model_args.cache_dir,
+                # revision=model_args.model_revision,
+                use_auth_token=True if model_args.use_auth_token else None,
+            )
 
         # set defaults for key names
         sentence1_key, sentence2_key = self.task_to_keys[data_args.task_name]
