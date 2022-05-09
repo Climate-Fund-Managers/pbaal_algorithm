@@ -10,13 +10,13 @@ learning_rate: 0.00004
 logging_steps: 50
 logging_strategy: steps
 max_seq_length: 512
-max_steps: 684
+max_steps: 1300
 model_name_or_path: bert-base
 num_train_epochs: 3
 output_dir: /content/tmp/
 overwrite_output_dir: True
-per_device_eval_batch_size: 32
-per_device_train_batch_size: 32
+per_device_eval_batch_size: 16
+per_device_train_batch_size: 16
 query_samples_count: 256
 random_seed: 1
 remove_unused_columns: False
