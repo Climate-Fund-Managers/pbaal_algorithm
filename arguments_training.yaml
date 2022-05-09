@@ -11,7 +11,7 @@ logging_steps: 50
 logging_strategy: steps
 max_seq_length: 512
 max_steps: 1300
-model_name_or_path: bert-base
+model_name_or_path: roberta-base
 num_train_epochs: 3
 output_dir: /content/tmp/
 overwrite_output_dir: True
