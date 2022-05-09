@@ -141,10 +141,9 @@ class TransformerWithAdapters:
             "evaluation_strategy": args['evaluation_strategy'],
             "eval_steps": args['eval_steps'],
             "seed": args['seed'],
-            "max_steps": args['max_steps'],
             # The next line is important to ensure the dataset labels are properly passed to the model
             "remove_unused_columns": args['remove_unused_columns'],
-            "num_train_epochs": args['num_train_epochs']
+            'num_train_epochs': args['num_train_epochs']
 
         }
 
@@ -178,6 +177,8 @@ class TransformerWithAdapters:
             # TO BE ADJUSTED LATER
             pass
 
+        self.hf_args.update({"num_train_epochs": self.raw_datasets['']})
+
         self.use_adapters = args['use_adapters']
         self.adapter_name = args['adapter_name']
         self.adaptive_learning = args['adaptive_learning']
@@ -209,6 +210,10 @@ class TransformerWithAdapters:
         current_score = -1
 
         while unlabeled_dataset.num_rows > 0 and current_score < self.target_score:
+
+            self.hf_args["max_steps"] = (self.raw_datasets['train'].num_rows / self.hf_args[
+                'per_device_train_batch_size']) * self.hf_args['num_train_epochs']
+
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
             evaluation_metrics, test_predictions = self.__train()
@@ -336,10 +341,10 @@ class TransformerWithAdapters:
             model.add_adapter(self.adapter_name, config=self.adapter_config)
             model.add_classification_head(self.adapter_name, num_labels=num_labels)
             model.train_adapter(self.adapter_name)
-            # model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
+            model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
         else:
             model = AutoModelForSequenceClassification.from_pretrained(
-                model_args.model_name_or_path,  # microsoft/mpnet-base
+                model_args.model_name_or_path,
                 from_tf=bool(".ckpt" in model_args.model_name_or_path),
                 config=config,
                 cache_dir=model_args.cache_dir,
@@ -441,6 +446,7 @@ class TransformerWithAdapters:
                 raise ValueError("--do_predict requires a test dataset")
 
             predict_dataset = raw_datasets["test_matched"]
+
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_predict_samples is not None:
                 predict_dataset = predict_dataset.select(range(data_args.max_predict_samples))
@@ -502,7 +508,7 @@ class TransformerWithAdapters:
         metrics_prefix = f"train_size_{min(max_train_samples, len(train_dataset))}_4e_all"
 
         # Training\
-        # first check if previous chekpoint exists, otherwise start training from the scratch
+        # first check if previous checkpoint exists, otherwise start training from the scratch
         if training_args.do_train:
             checkpoint = None
             if training_args.resume_from_checkpoint is not None:
