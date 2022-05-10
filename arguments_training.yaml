@@ -11,7 +11,7 @@ logging_steps: 50
 logging_strategy: steps
 max_seq_length: 512
 model_name_or_path: climatebert/distilroberta-base-climate-f
-num_train_epochs: 3
+num_train_epochs: 5
 output_dir: /content/tmp/
 overwrite_output_dir: True
 per_device_eval_batch_size: 16
