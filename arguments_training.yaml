@@ -1,5 +1,5 @@
 adapter_config: default
-adapter_name: compacter
+adapter_name: mam_adapter
 adaptive_learning: False
 do_eval: True
 do_train: True
@@ -21,7 +21,7 @@ random_seed: 1
 remove_unused_columns: False
 run_active_learning: True
 seed: 12
-target_score: 87.1
+target_score: 0.9
 task_name: mnli
 test_file: /content/Rio_Marker_Tool/datasets/test.csv
 train_file: /content/Rio_Marker_Tool/datasets/train.csv
