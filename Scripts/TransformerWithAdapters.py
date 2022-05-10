@@ -212,7 +212,7 @@ class TransformerWithAdapters:
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
             evaluation_metrics, test_predictions = self.__train()
-            current_score = evaluation_metrics["eval_combined_score"]
+            current_score = evaluation_metrics["eval_accuracy"]
 
             samples_entropy = TransformerWithAdapters.__calculate_entropy(test_predictions)
             samples_entropy = torch.topk(samples_entropy, self.query_samples_count)
@@ -528,7 +528,6 @@ class TransformerWithAdapters:
             tasks = [data_args.task_name]
             eval_datasets = [eval_dataset]
             tasks.append("mnli-mm")
-            eval_datasets.append(raw_datasets["validation_mismatched"])
 
             for eval_dataset, task in zip(eval_datasets, tasks):
                 metrics = trainer.evaluate(eval_dataset=eval_dataset)
@@ -553,7 +552,6 @@ class TransformerWithAdapters:
             tasks = [data_args.task_name]
             predict_datasets = [predict_dataset]
             tasks.append("mnli-mm")
-            predict_datasets.append(raw_datasets["test_mismatched"])
 
             for predict_dataset, task in zip(predict_datasets, tasks):
                 # Removing the `label` columns because it contains -1 and Trainer won't like that.
