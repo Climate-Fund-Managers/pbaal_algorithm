@@ -189,13 +189,13 @@ class TransformerWithAdapters:
         self.query_samples_count = args['query_samples_count']
 
     def run_standard_learning(self):
-
+        self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
         self.__train()
 
     def run_active_learning(self):
-
+        self.logger.info("ACTIVE LEARNING INITIATED")
         original_train_dataset = self.raw_datasets["train"]
 
         train_dataset = original_train_dataset.select(
@@ -450,7 +450,7 @@ class TransformerWithAdapters:
             if "test_matched" not in raw_datasets:
                 raise ValueError("--do_predict requires a test dataset")
 
-            predict_dataset = raw_datasets["test_matched"]
+            predict_dataset = raw_datasets["test"]
 
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_predict_samples is not None:
