@@ -19,6 +19,7 @@ per_device_train_batch_size: 16
 query_samples_count: 256
 random_seed: 1
 remove_unused_columns: False
+run_active_learning: True
 seed: 12
 target_score: 87.1
 task_name: mnli

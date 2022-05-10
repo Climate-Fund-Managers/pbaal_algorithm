@@ -184,6 +184,12 @@ class TransformerWithAdapters:
         self.initial_train_dataset_size = args['initial_train_dataset_size']
         self.query_samples_count = args['query_samples_count']
 
+    def run_standard_learning(self):
+
+        self.hf_args["do_predict"] = True
+        self.logger.info(f'Training using full dataset')
+        self.__train()
+
     def run_active_learning(self):
 
         original_train_dataset = self.raw_datasets["train"]
@@ -570,4 +576,7 @@ if __name__ == "__main__":
         arguments = yaml.safe_load(f)
 
     train_transformer = TransformerWithAdapters(arguments)
-    train_transformer.run_active_learning()
+    if arguments['run_active_learning']:
+        train_transformer.run_active_learning()
+    else:
+        train_transformer.run_standard_learning()
