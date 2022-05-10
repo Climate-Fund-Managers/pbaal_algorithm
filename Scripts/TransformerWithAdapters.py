@@ -25,7 +25,7 @@ from transformers import (
 )
 
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.adapters import CompacterConfig
+from transformers.adapters import CompacterConfig, AdapterConfig, PfeifferInvConfig, PrefixTuningConfig, MAMConfig
 import yaml
 from dataclasses import dataclass, field
 from typing import Optional
@@ -147,10 +147,6 @@ class TransformerWithAdapters:
 
         }
 
-        # e.g 684 = (5476 (samples) / 32 (batch size)) *  4 epochs
-        # Using max_steps instead of train_epoch since we want all experiment to train for the same
-        # number of iterations.
-
         if args['use_tensorboard']:
             self.hf_args.update(
                 {
@@ -171,8 +167,16 @@ class TransformerWithAdapters:
                                                      'test_matched': args['test_file']},
                                          features=features)
 
+        config = {'compacter': CompacterConfig(),
+                  'bottleneck_adapter':  AdapterConfig(mh_adapter=True, output_adapter=True, reduction_factor=16, non_linearity="relu"),
+                  'lang_adapter': PfeifferInvConfig(),
+                  'prefix_tuning': PrefixTuningConfig(flat=False, prefix_length=30),
+                  'mam_adapter': MAMConfig()
+                  }
+
         if args['adapter_config'] == 'default':
-            self.adapter_config = CompacterConfig()
+            self.adapter_config = config[args['adapter_name']]
+
         else:
             # TO BE ADJUSTED LATER
             pass
