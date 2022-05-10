@@ -167,6 +167,9 @@ class TransformerWithAdapters:
                                                      'test_matched': args['test_file']},
                                          features=features)
 
+        if not args['run_active_learning']:
+            self.raw_datasets["test"] = self.raw_datasets["test_matched"]
+
         config = {'compacter': CompacterConfig(),
                   'bottleneck_adapter':  AdapterConfig(mh_adapter=True, output_adapter=True, reduction_factor=16, non_linearity="relu"),
                   'lang_adapter': PfeifferInvConfig(),
@@ -217,7 +220,7 @@ class TransformerWithAdapters:
 
         current_score = -1
 
-        while unlabeled_dataset.num_rows > 0 and current_score < self.target_score:
+        while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
 
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
