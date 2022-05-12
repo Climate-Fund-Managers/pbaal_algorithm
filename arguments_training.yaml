@@ -16,6 +16,7 @@ output_dir: /content/tmp/
 overwrite_output_dir: True
 per_device_eval_batch_size: 16
 per_device_train_batch_size: 16
+pretrained_adapter : None
 query_samples_count: 256
 random_seed: 1
 remove_unused_columns: False
@@ -27,5 +28,6 @@ test_file: /content/Rio_Marker_Tool/datasets/test.csv
 train_file: /content/Rio_Marker_Tool/datasets/train.csv
 type_file: csv
 use_adapters: True
+use_pretrained_adapters: False
 use_tensorboard: True
 validation_file: /content/Rio_Marker_Tool/datasets/valid.csv

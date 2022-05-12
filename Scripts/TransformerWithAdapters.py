@@ -185,6 +185,8 @@ class TransformerWithAdapters:
             pass
 
         self.use_adapters = args['use_adapters']
+        self.use_pretrained_adapters = args['use_pretrained_adapters']
+        self.pretrained_adapter = args['pretrained_adapter']
         self.adapter_name = args['adapter_name']
         self.adaptive_learning = args['adaptive_learning']
         self.target_score = args['target_score']
@@ -335,6 +337,7 @@ class TransformerWithAdapters:
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
+        """CUSTOM CHANGES USING ADAPTERS"""
         if self.use_adapters:
             model = AutoAdapterModel.from_pretrained(
                 model_args.model_name_or_path,  # microsoft/mpnet-base
@@ -344,12 +347,21 @@ class TransformerWithAdapters:
                 # revision=model_args.model_revision,
                 use_auth_token=True if model_args.use_auth_token else None,
             )
-            """CUSTOM CHANGES USING ADAPTERS"""
-            # Add a new adapter
-            model.add_adapter(self.adapter_name, config=self.adapter_config)
-            model.add_classification_head(self.adapter_name, num_labels=num_labels)
-            model.train_adapter(self.adapter_name)
-            model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
+
+            "WHETHER TO USE PRETRAINED ADAPTER OR NOT"
+            if self.use_pretrained_adapters:
+                pretrained_adapter_name = self.pretrained_adapter.split('/')[1].split("-")[0]
+                if pretrained_adapter_name != self.model_name_or_path.split("-")[0]:
+                    raise Exception("Pretrained adapter was trained on different transformer than the one in use")
+                else:
+                    adapter_name = model.load_adapter(self.pretrained_adapter, source="hf")
+                    model.active_adapters = adapter_name
+
+            else:
+                model.add_adapter(self.adapter_name, config=self.adapter_config)
+                model.add_classification_head(self.adapter_name, num_labels=num_labels)
+                model.train_adapter(self.adapter_name)
+                model.set_active_adapters(self.adapter_name)  # registers the adapter as a default for training
         else:
             model = AutoModelForSequenceClassification.from_pretrained(
                 model_args.model_name_or_path,
