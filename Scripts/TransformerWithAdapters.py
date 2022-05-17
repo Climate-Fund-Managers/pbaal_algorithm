@@ -157,7 +157,7 @@ class TransformerWithAdapters:
 
         features = Features({'hypothesis': Value(dtype='string', id=None),
                              'idx': Value(dtype='int64', id=None),
-                             'label': ClassLabel(num_classes=3, names=['entailment', 'neutral', 'contradiction'],
+                             'label': ClassLabel(num_classes=2, names=['entailment', 'neutral'],
                                                  id=None),
                              'premise': Value(dtype='string', id=None)})
 
