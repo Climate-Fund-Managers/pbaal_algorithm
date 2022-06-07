@@ -165,7 +165,8 @@ class TransformerWithAdapters:
                                          data_files={'train': args['train_file'],
                                                      'validation_matched': args['validation_file'],
                                                      'test_matched': args['test_file']},
-                                         features=features)
+                                         features=features,
+                                         encoding='cp1252')
 
         if not args['run_active_learning']:
             self.raw_datasets["test"] = self.raw_datasets["test_matched"]
