@@ -1,4 +1,5 @@
 import logging
+import pandas as pd
 import os
 import random
 import sys
@@ -192,13 +193,18 @@ class TransformerWithAdapters:
         self.adaptive_learning = args['adaptive_learning']
         self.target_score = args['target_score']
         self.initial_train_dataset_size = args['initial_train_dataset_size']
+        self.do_query = args['do_query']
         self.query_samples_count = args['query_samples_count']
+        self.do_ratio = args['do_ratio']
+        self.query_samples_ratio = args['query_samples_ratio']
+        self.result_location = args['result_location'] + args['model_name_or_path'] + "/"
 
     def run_standard_learning(self):
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        self.__train()
+        evaluation_metrics, test_predictions = self.__train()
+        pd.DataFrame(test_predictions).to_csv(self.result_location+'predictions.csv')
 
     def run_active_learning(self):
         self.logger.info("ACTIVE LEARNING INITIATED")
@@ -222,16 +228,22 @@ class TransformerWithAdapters:
         self.hf_args["do_predict"] = True
 
         current_score = -1
+        all_scores = {"scores": [],
+                      "# of records used": []}
 
         while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
 
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
             evaluation_metrics, test_predictions = self.__train()
-            current_score = evaluation_metrics["eval_accuracy"]
+            all_scores['scores'].append(evaluation_metrics["eval_accuracy"])
+            all_scores['# of records used'].append(unlabeled_dataset.num_rows)
 
-            samples_entropy = TransformerWithAdapters.__calculate_entropy(test_predictions)
-            samples_entropy = torch.topk(samples_entropy, self.query_samples_count)
+            samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
+            if self.do_query:
+                samples_entropy = torch.topk(samples_entropy_all, self.query_samples_count)
+            elif self.do_ratio:
+                samples_entropy = torch.topk(samples_entropy_all, unlabeled_dataset.num_rows*self.query_samples_ratio)
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
 
@@ -246,6 +258,10 @@ class TransformerWithAdapters:
 
             self.raw_datasets["train"] = extended_train_dataset
             self.raw_datasets["test"] = unlabeled_dataset
+
+        pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
+        pd.DataFrame({'idx': unlabeled_dataset['idx'],
+                      'prediction': test_predictions}).to_csv(self.result_location+'predictions.csv')
 
     @staticmethod
     def __calculate_entropy(logit):
