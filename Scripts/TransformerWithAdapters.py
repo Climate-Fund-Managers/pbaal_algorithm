@@ -198,6 +198,26 @@ class TransformerWithAdapters:
         self.do_ratio = args['do_ratio']
         self.query_samples_ratio = args['query_samples_ratio']
         self.result_location = args['result_location'] + args['model_name_or_path'] + "/"
+        self.pool_based_learning = args['pool_based_learning']
+        self.query_by_committee = args['query_by_committee']
+        self.list_of_models = args['list_of_models']
+
+    def run_majority_vote(self):
+        self.logger.info("MAJORITY VOTE LEARNING INITIATED")
+        self.hf_args["do_predict"] = True
+        self.logger.info(f'Training using full dataset')
+
+        results= pd.DataFrame()
+        for model in self.list_of_models:
+            self.hf_args['model_name_or_path'] = model
+            evaluation_metrics, test_predictions = self.__train()
+            results[model] = test_predictions
+
+        results['mean'] = results.mean(axis=1)
+        results.round({'mean': 0})
+        results['truth'] = self.raw_datasets['test_matched']['label']
+        results['score'] = results.apply(lambda x: self.__calculate_accuracy(x.truth, x.mean), axis=1)
+        results.DataFrame(test_predictions).to_csv(self.result_location + 'ensemble_predictions.csv')
 
     def run_standard_learning(self):
         self.logger.info("STANDARD LEARNING INITIATED")
@@ -227,6 +247,68 @@ class TransformerWithAdapters:
 
         self.hf_args["do_predict"] = True
 
+        if self.pool_based_learning:
+            self.__pool_based_learning(original_train_dataset, unlabeled_dataset)
+        elif self.query_by_committee:
+            self.__query_by_committee(original_train_dataset, unlabeled_dataset)
+
+    def __calculate_accuracy(self, truth, mean):
+        if truth == mean:
+            return 1
+        else:
+            return 0
+
+    def __query_by_committee(self, original_train_dataset, unlabeled_dataset):
+        current_score = -1
+        all_scores = {"scores": [],
+                      "# of records used": []}
+
+        while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
+
+            self.logger.info(f'Query by committee training using {self.raw_datasets["train"].num_rows}')
+            results = pd.DataFrame()
+
+            for model in self.list_of_models:
+                self.hf_args['model_name_or_path'] = model
+                evaluation_metrics, test_predictions = self.__train()
+                results[model] = test_predictions
+
+            results['variance'] = results.var(axis=1)
+
+            if self.do_query:
+                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+            if self.do_ratio:
+                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+
+            results['mean'] = results.mean(axis=1)
+            results.round({'mean': 0})
+            results['truth'] = unlabeled_dataset['label']
+            results['score'] = results.apply(lambda x: self.__calculate_accuracy(x.truth, x.mean), axis=1)
+            current_score = results['score'].mean()
+            all_scores['scores'].append(current_score)
+            all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
+
+            new_train_samples = unlabeled_dataset.select(idxs)
+
+            extended_train_dataset = concatenate_datasets(
+                [self.raw_datasets["train"], new_train_samples],
+                info=original_train_dataset.info,
+            )
+
+            unlabeled_dataset = original_train_dataset.filter(
+                lambda s: s["idx"] not in extended_train_dataset["idx"]
+            )
+
+            self.raw_datasets["train"] = extended_train_dataset
+            self.raw_datasets["test"] = unlabeled_dataset
+
+        # change, using wrong dataset
+        pd.DataFrame(all_scores).to_csv(self.result_location + 'scores_per_run.csv')
+        pd.DataFrame({'idx': unlabeled_dataset['idx'],
+                      'prediction': results['mean']}).to_csv(self.result_location+'predictions.csv')
+
+
+    def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
@@ -236,8 +318,9 @@ class TransformerWithAdapters:
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
             evaluation_metrics, test_predictions = self.__train()
-            all_scores['scores'].append(evaluation_metrics["eval_accuracy"])
-            all_scores['# of records used'].append(unlabeled_dataset.num_rows)
+            current_score = evaluation_metrics["eval_accuracy"]
+            all_scores['scores'].append(current_score)
+            all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
 
             samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
             if self.do_query:
