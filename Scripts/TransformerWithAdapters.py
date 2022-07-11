@@ -1,15 +1,29 @@
 import logging
-import pandas as pd
 import os
 import random
 import sys
+import time
+from dataclasses import dataclass, field
+from typing import Optional
+
 import datasets
 import numpy as np
+import pandas as pd
 import torch
 import transformers
-from datasets import concatenate_datasets, load_dataset, load_metric,Features, Value, ClassLabel
+import yaml
+from datasets import (
+    ClassLabel,
+    Features,
+    Value,
+    concatenate_datasets,
+    load_dataset,
+    load_metric,
+)
 from scipy.stats import entropy
 from transformers import (
+    AdapterTrainer,
+    AutoAdapterModel,
     AutoConfig,
     AutoModelForSequenceClassification,
     AutoTokenizer,
@@ -17,19 +31,19 @@ from transformers import (
     HfArgumentParser,
     PretrainedConfig,
     Trainer,
+    TrainerCallback,
     TrainingArguments,
     default_data_collator,
     set_seed,
-    AdapterTrainer,
-    TrainerCallback,
-    AutoAdapterModel
 )
-
+from transformers.adapters import (
+    AdapterConfig,
+    CompacterConfig,
+    MAMConfig,
+    PfeifferInvConfig,
+    PrefixTuningConfig,
+)
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.adapters import CompacterConfig, AdapterConfig, PfeifferInvConfig, PrefixTuningConfig, MAMConfig
-import yaml
-from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -126,6 +140,15 @@ class TransformerWithAdapters:
 
         random.seed(args['random_seed'])
 
+        ts = time.time()
+
+        if args["pool_based_learning"]:
+            unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
+        elif args["query_by_committee"]:
+            unique_results_identifier = f"{args['list_of_models'][0]}/active_query_comittee/{ts}"
+        else: 
+            unique_results_identifier = f"{args['list_of_models'][0]}/non_active/{ts}"
+
         self.hf_args = {
             "model_name_or_path": args['model_name_or_path'],
             "task_name": args['task_name'],
@@ -136,7 +159,7 @@ class TransformerWithAdapters:
             "per_device_eval_batch_size": args['per_device_eval_batch_size'],
             "learning_rate": args['learning_rate'],
             "overwrite_output_dir": args['overwrite_output_dir'],
-            "output_dir": args['output_dir'] + args['task_name'] + "/",
+            "output_dir": f"{args['output_dir']}/{unique_results_identifier}/" ,
             "logging_strategy": args['logging_strategy'],
             "logging_steps": args['logging_steps'],
             "evaluation_strategy": args['evaluation_strategy'],
@@ -197,7 +220,7 @@ class TransformerWithAdapters:
         self.query_samples_count = args['query_samples_count']
         self.do_ratio = args['do_ratio']
         self.query_samples_ratio = args['query_samples_ratio']
-        self.result_location = args['result_location'] + args['model_name_or_path'] + "/"
+        self.result_location = f"{args['result_location']}/{unique_results_identifier}/"
         self.pool_based_learning = args['pool_based_learning']
         self.query_by_committee = args['query_by_committee']
         self.list_of_models = args['list_of_models']
