@@ -239,7 +239,7 @@ class TransformerWithAdapters:
         results['mean'] = results.mean(axis=1)
         results.round({'mean': 0})
         results['truth'] = self.raw_datasets['test_matched']['label']
-        results['score'] = results.apply(lambda x: self.__calculate_accuracy(x.truth, x.mean), axis=1)
+        results['score'] = results['truth'] == results['mean']
         results.DataFrame(test_predictions).to_csv(self.result_location + 'ensemble_predictions.csv')
 
     def run_standard_learning(self):
@@ -275,12 +275,6 @@ class TransformerWithAdapters:
         elif self.query_by_committee:
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
-    def __calculate_accuracy(self, truth, mean):
-        if truth == mean:
-            return 1
-        else:
-            return 0
-
     def __query_by_committee(self, original_train_dataset, unlabeled_dataset):
         current_score = -1
         all_scores = {"scores": [],
@@ -306,7 +300,7 @@ class TransformerWithAdapters:
             results['mean'] = results.mean(axis=1)
             results.round({'mean': 0})
             results['truth'] = unlabeled_dataset['label']
-            results['score'] = results.apply(lambda x: self.__calculate_accuracy(x.truth, x.mean), axis=1)
+            results['score'] = results['truth'] == results['mean'] 
             current_score = results['score'].mean()
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
