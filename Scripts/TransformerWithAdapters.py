@@ -289,8 +289,7 @@ class TransformerWithAdapters:
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
                 evaluation_metrics, test_predictions = self.__train()
-                print(test_predictions)
-                results[model] = test_predictions
+                results[model] = torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions))
                 
 
             results['variance'] = results.var(axis=1)
