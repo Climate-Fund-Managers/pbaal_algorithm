@@ -408,7 +408,7 @@ class TransformerWithAdapters:
 
     def __train(self,raw_datasets):
         self.logger.info(f'Fuck Training using {raw_datasets["train"].num_rows}')
-        self.logger.info(f'Fuck Max train sample {data_args.max_train_samples}')
+        
         parser = HfArgumentParser(
             (ModelArguments, DataTrainingArguments, TrainingArguments))
 
@@ -417,6 +417,8 @@ class TransformerWithAdapters:
             model_args, data_args, training_args = parser.parse_dict(self.hf_args)
         else:
             model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+
+        self.logger.info(f'Fuck Max train sample {data_args.max_train_samples}')
 
         # Setup logging
         logging.basicConfig(
