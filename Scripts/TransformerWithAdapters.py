@@ -179,17 +179,20 @@ class TransformerWithAdapters:
                 }
             )
 
-        features = Features({'hypothesis': Value(dtype='string', id=None),
+        self.features = Features({'hypothesis': Value(dtype='string', id=None),
                              'idx': Value(dtype='int64', id=None),
                              'label': ClassLabel(num_classes=2, names=['entailment', 'neutral'],
                                                  id=None),
                              'premise': Value(dtype='string', id=None)})
+        self.type_file = args['type_file']
+        self.validation_path = args['validation_file']
+        self.test_path = args['test_file']
 
-        self.raw_datasets = load_dataset(args['type_file'],
+        self.raw_datasets = load_dataset(self.type_file,
                                          data_files={'train': args['train_file'],
-                                                     'validation_matched': args['validation_file'],
-                                                     'test_matched': args['test_file']},
-                                         features=features,
+                                                     'validation_matched': self.validation_path,
+                                                     'test_matched': self.test_path},
+                                         features=self.features,
                                          encoding='cp1252')
 
         if not args['run_active_learning']:
@@ -252,7 +255,7 @@ class TransformerWithAdapters:
     def run_active_learning(self):
         self.logger.info("ACTIVE LEARNING INITIATED")
         original_train_dataset = self.raw_datasets["train"]
-
+        print(f"Original train dataset length: {len(original_train_dataset)}")
         train_dataset = original_train_dataset.select(
             random.sample(
                 range(original_train_dataset.num_rows),
@@ -265,8 +268,13 @@ class TransformerWithAdapters:
             lambda s: s["idx"] not in train_dataset["idx"]
         )
 
-        self.raw_datasets["train"] = train_dataset
-        self.raw_datasets["test"] = unlabeled_dataset
+        self.raw_datasets = load_dataset(self.type_file,
+                                            data_files={'train': train_dataset,
+                                                        'validation_matched': self.validation_path,
+                                                        'test_matched': self.test_path,
+                                                        'test' : unlabeled_dataset},
+                                            features=self.features,
+                                            encoding='cp1252')
 
         self.hf_args["do_predict"] = True
 
@@ -282,7 +290,7 @@ class TransformerWithAdapters:
                       "# of records used": []}
 
         while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
-
+            print(f"Original train dataset length: {len(original_train_dataset)}")
             self.logger.info(f'Query by committee training using {self.raw_datasets["train"].num_rows}')
             results = pd.DataFrame()
 
@@ -319,8 +327,13 @@ class TransformerWithAdapters:
                 lambda s: s["idx"] not in extended_train_dataset["idx"]
             )
 
-            self.raw_datasets["train"] = extended_train_dataset
-            self.raw_datasets["test"] = unlabeled_dataset
+            self.raw_datasets = load_dataset(self.type_file,
+                                            data_files={'train': extended_train_dataset,
+                                                        'validation_matched': self.validation_path,
+                                                        'test_matched': self.test_path,
+                                                        'test' : unlabeled_dataset},
+                                            features=self.features,
+                                            encoding='cp1252')
 
         # change, using wrong dataset
         pd.DataFrame(all_scores).to_csv(self.result_location + 'scores_per_run.csv')
@@ -335,7 +348,7 @@ class TransformerWithAdapters:
                       "# of records used": []}
 
         while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
-
+            print(f"Original train dataset length: {len(original_train_dataset)}")
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
             evaluation_metrics, test_predictions = self.__train()
@@ -351,21 +364,23 @@ class TransformerWithAdapters:
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
 
-            print(len(self.raw_datasets["train"]))
             extended_train_dataset = concatenate_datasets(
                 [self.raw_datasets["train"], new_train_samples],
                 info=original_train_dataset.info,
             )
 
-            print(extended_train_dataset)
-            print(len(extended_train_dataset))
-
             unlabeled_dataset = original_train_dataset.filter(
                 lambda s: s["idx"] not in extended_train_dataset["idx"]
             )
 
-            self.raw_datasets["train"] = extended_train_dataset
-            self.raw_datasets["test"] = unlabeled_dataset
+            self.raw_datasets = load_dataset(self.type_file,
+                                            data_files={'train': extended_train_dataset,
+                                                        'validation_matched': self.validation_path,
+                                                        'test_matched': self.test_path,
+                                                        'test' : unlabeled_dataset},
+                                            features=self.features,
+                                            encoding='cp1252')
+
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
         pd.DataFrame({'idx': unlabeled_dataset['idx'],
