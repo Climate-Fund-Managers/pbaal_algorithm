@@ -361,7 +361,7 @@ class TransformerWithAdapters:
             print(f"Original train dataset length: {len(original_train_dataset)}")
             self.logger.info(f'Training using {raw_datasets["train"].num_rows}')
 
-            evaluation_metrics, test_predictions = self.__train(raw_datasets)
+            evaluation_metrics, test_predictions = self.__train(original_train_dataset)
             current_score = evaluation_metrics["eval_accuracy"]
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(raw_datasets["train"].num_rows)
@@ -406,7 +406,7 @@ class TransformerWithAdapters:
         samples_entropy = torch.from_numpy(samples_entropy)
         return samples_entropy
 
-    def __train(self,raw_datasets):
+    def __train(self,raw_datasets,original_train_dataset):
         self.logger.info(f'Fuck Training using {raw_datasets["train"].num_rows}')
         
         parser = HfArgumentParser(
@@ -679,7 +679,7 @@ class TransformerWithAdapters:
         max_train_samples = (
             data_args.max_train_samples
             if data_args.max_train_samples is not None
-            else len(train_dataset)
+            else len(original_train_dataset)
         )
 
         metrics_prefix = f"train_size_{min(max_train_samples, len(train_dataset))}_4e_all"
