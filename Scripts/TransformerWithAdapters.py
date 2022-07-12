@@ -278,14 +278,13 @@ class TransformerWithAdapters:
 
         raw_datasets["train"] = train_dataset
         raw_datasets["test"] = unlabeled_dataset
-        self.raw_datasets = raw_datasets
 
-        print(len(self.raw_datasets["train"]))
+        print(len(raw_datasets["train"]))
 
         self.hf_args["do_predict"] = True
 
         if self.pool_based_learning:
-            self.__pool_based_learning(original_train_dataset, unlabeled_dataset)
+            self.__pool_based_learning(raw_datsets,original_train_dataset, unlabeled_dataset)
         elif self.query_by_committee:
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
@@ -352,21 +351,21 @@ class TransformerWithAdapters:
                       'prediction': results['mean']}).to_csv(self.result_location+'predictions.csv')
 
 
-    def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
+    def __pool_based_learning(self, raw_datsets,original_train_dataset, unlabeled_dataset):
         print("Pool based learning invoked")
-        print(len(self.raw_datasets["train"]))
+        print(len(raw_datasets["train"]))
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
 
         while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
             print(f"Original train dataset length: {len(original_train_dataset)}")
-            self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
+            self.logger.info(f'Training using {raw_datasets["train"].num_rows}')
 
-            evaluation_metrics, test_predictions = self.__train()
+            evaluation_metrics, test_predictions = self.__train(raw_datasets)
             current_score = evaluation_metrics["eval_accuracy"]
             all_scores['scores'].append(current_score)
-            all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
+            all_scores['# of records used'].append(raw_datasets["train"].num_rows)
 
             samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
             if self.do_query:
@@ -377,7 +376,7 @@ class TransformerWithAdapters:
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
 
             extended_train_dataset = concatenate_datasets(
-                [self.raw_datasets["train"], new_train_samples],
+                [raw_datasets["train"], new_train_samples],
                 info=original_train_dataset.info,
             )
 
@@ -395,7 +394,6 @@ class TransformerWithAdapters:
 
             raw_datasets["train"] = extended_train_dataset
             raw_datasets["test"] = unlabeled_dataset
-            self.raw_datasets = raw_datasets
 
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
@@ -409,7 +407,7 @@ class TransformerWithAdapters:
         samples_entropy = torch.from_numpy(samples_entropy)
         return samples_entropy
 
-    def __train(self):
+    def __train(self,raw_datsets):
         global train_dataset
         parser = HfArgumentParser(
             (ModelArguments, DataTrainingArguments, TrainingArguments))
@@ -468,7 +466,7 @@ class TransformerWithAdapters:
         set_seed(training_args.seed)
 
         # obtain the labels
-        label_list = self.raw_datasets["train"].features["label"].names
+        label_list = raw_datasets["train"].features["label"].names
         num_labels = len(label_list)
 
         # loading pre-trained model & tokenizer & config
@@ -586,7 +584,7 @@ class TransformerWithAdapters:
 
         # preprocess/ tokenize dataset
         with training_args.main_process_first(desc="dataset map pre-processing"):
-            raw_datasets = self.raw_datasets.map(
+            raw_datasets = raw_datasets.map(
                 preprocess_function,
                 batched=True,
                 load_from_cache_file=not data_args.overwrite_cache,
