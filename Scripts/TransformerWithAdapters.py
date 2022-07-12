@@ -268,7 +268,7 @@ class TransformerWithAdapters:
             lambda s: s["idx"] not in train_dataset["idx"]
         )
 
-        self.raw_datasets = load_dataset(self.type_file,
+        raw_datasets = load_dataset(self.type_file,
                                             data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
@@ -276,8 +276,9 @@ class TransformerWithAdapters:
                                             features=self.features,
                                             encoding='cp1252')
 
-        self.raw_datasets["train"] = train_dataset
-        self.raw_datasets["test"] = unlabeled_dataset
+        raw_datasets["train"] = train_dataset
+        raw_datasets["test"] = unlabeled_dataset
+        self.raw_datasets = raw_datasets
 
         print(len(self.raw_datasets["train"]))
 
@@ -332,7 +333,7 @@ class TransformerWithAdapters:
                 lambda s: s["idx"] not in extended_train_dataset["idx"]
             )
 
-            self.raw_datasets = load_dataset(self.type_file,
+            raw_datasets = load_dataset(self.type_file,
                                             data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
@@ -340,8 +341,9 @@ class TransformerWithAdapters:
                                             features=self.features,
                                             encoding='cp1252')
 
-            self.raw_datasets["train"] = extended_train_dataset
-            self.raw_datasets["test"] = unlabeled_dataset
+            raw_datasets["train"] = extended_train_dataset
+            raw_datasets["test"] = unlabeled_dataset
+            self.raw_datasets = raw_datasets
 
 
         # change, using wrong dataset
@@ -383,7 +385,7 @@ class TransformerWithAdapters:
                 lambda s: s["idx"] not in extended_train_dataset["idx"]
             )
 
-            self.raw_datasets = load_dataset(self.type_file,
+            raw_datasets = load_dataset(self.type_file,
                                             data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
@@ -391,8 +393,9 @@ class TransformerWithAdapters:
                                             features=self.features,
                                             encoding='cp1252')
 
-            self.raw_datasets["train"] = extended_train_dataset
-            self.raw_datasets["test"] = unlabeled_dataset
+            raw_datasets["train"] = extended_train_dataset
+            raw_datasets["test"] = unlabeled_dataset
+            self.raw_datasets = raw_datasets
 
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
@@ -596,10 +599,11 @@ class TransformerWithAdapters:
                 raise ValueError("--do_train requires a train dataset")
 
             train_dataset = raw_datasets["train"]
+            
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_train_samples is not None:
                 train_dataset = train_dataset.select(range(data_args.max_train_samples))
-
+        print(f"Train dataset length: {len(train_dataset)}")
         # set evaluation dataset
         if training_args.do_eval:
             if "validation_matched" not in raw_datasets:
