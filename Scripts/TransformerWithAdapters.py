@@ -589,7 +589,7 @@ class TransformerWithAdapters:
             raw_datasets = raw_datasets.map(
                 preprocess_function,
                 batched=True,
-                load_from_cache_file=not data_args.overwrite_cache,
+                load_from_cache_file=False,
                 # if overwrite True, do not load previously cached file
             )
 
