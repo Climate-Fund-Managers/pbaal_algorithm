@@ -361,7 +361,7 @@ class TransformerWithAdapters:
             print(f"Original train dataset length: {len(original_train_dataset)}")
             self.logger.info(f'Training using {raw_datasets["train"].num_rows}')
 
-            evaluation_metrics, test_predictions = self.__train(original_train_dataset)
+            evaluation_metrics, test_predictions = self.__train(raw_datasets,original_train_dataset)
             current_score = evaluation_metrics["eval_accuracy"]
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(raw_datasets["train"].num_rows)
