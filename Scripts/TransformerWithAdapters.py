@@ -269,12 +269,17 @@ class TransformerWithAdapters:
         )
 
         self.raw_datasets = load_dataset(self.type_file,
-                                            data_files={'train': train_dataset,
+                                            data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
-                                                        'test' : unlabeled_dataset},
+                                                        },
                                             features=self.features,
                                             encoding='cp1252')
+
+        self.raw_datasets["train"] = train_dataset
+        self.raw_datasets["test"] = unlabeled_dataset
+
+        print(len(self.raw_datasets["train"]))
 
         self.hf_args["do_predict"] = True
 
@@ -328,12 +333,16 @@ class TransformerWithAdapters:
             )
 
             self.raw_datasets = load_dataset(self.type_file,
-                                            data_files={'train': extended_train_dataset,
+                                            data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
-                                                        'test' : unlabeled_dataset},
+                                                        },
                                             features=self.features,
                                             encoding='cp1252')
+
+            self.raw_datasets["train"] = extended_train_dataset
+            self.raw_datasets["test"] = unlabeled_dataset
+
 
         # change, using wrong dataset
         pd.DataFrame(all_scores).to_csv(self.result_location + 'scores_per_run.csv')
@@ -343,6 +352,7 @@ class TransformerWithAdapters:
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
         print("Pool based learning invoked")
+        print(len(self.raw_datasets["train"]))
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
@@ -374,12 +384,15 @@ class TransformerWithAdapters:
             )
 
             self.raw_datasets = load_dataset(self.type_file,
-                                            data_files={'train': extended_train_dataset,
+                                            data_files={
                                                         'validation_matched': self.validation_path,
                                                         'test_matched': self.test_path,
-                                                        'test' : unlabeled_dataset},
+                                                        },
                                             features=self.features,
                                             encoding='cp1252')
+
+            self.raw_datasets["train"] = extended_train_dataset
+            self.raw_datasets["test"] = unlabeled_dataset
 
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
