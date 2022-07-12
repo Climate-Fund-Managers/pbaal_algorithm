@@ -407,6 +407,8 @@ class TransformerWithAdapters:
         return samples_entropy
 
     def __train(self,raw_datasets):
+        self.logger.info(f'Fuck Training using {raw_datasets["train"].num_rows}')
+        self.logger.info(f'Fuck Max train sample {data_args.max_train_samples}')
         parser = HfArgumentParser(
             (ModelArguments, DataTrainingArguments, TrainingArguments))
 
