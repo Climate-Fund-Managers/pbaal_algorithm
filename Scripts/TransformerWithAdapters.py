@@ -283,7 +283,7 @@ class TransformerWithAdapters:
         self.hf_args["do_predict"] = True
 
         if self.pool_based_learning:
-            self.__pool_based_learning(raw_datsets,original_train_dataset, unlabeled_dataset)
+            self.__pool_based_learning(raw_datasets,original_train_dataset, unlabeled_dataset)
         elif self.query_by_committee:
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
