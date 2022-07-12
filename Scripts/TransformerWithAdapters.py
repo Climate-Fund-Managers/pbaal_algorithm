@@ -347,7 +347,7 @@ class TransformerWithAdapters:
             if self.do_query:
                 samples_entropy = torch.topk(samples_entropy_all, self.query_samples_count)
             elif self.do_ratio:
-                samples_entropy = torch.topk(samples_entropy_all, unlabeled_dataset.num_rows*self.query_samples_ratio)
+                samples_entropy = torch.topk(samples_entropy_all, int(unlabeled_dataset.num_rows*self.query_samples_ratio))
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
 
