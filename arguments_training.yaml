@@ -13,7 +13,7 @@ logging_strategy: steps
 max_seq_length: 512
 model_name_or_path: climatebert/distilroberta-base-climate-f
 num_train_epochs: 7
-output_dir: /content/tmp/
+output_dir: /content/tmp
 overwrite_output_dir: True
 per_device_eval_batch_size: 16
 per_device_train_batch_size: 16
@@ -26,7 +26,7 @@ query_by_committee: False
 query_samples_ratio: 0.1
 random_seed: 1
 remove_unused_columns: False
-result_location: content/results/
+result_location: content/results
 run_active_learning: True
 seed: 12
 target_score: 0.9

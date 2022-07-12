@@ -351,10 +351,14 @@ class TransformerWithAdapters:
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
 
+            print(len(self.raw_datasets["train"]))
             extended_train_dataset = concatenate_datasets(
                 [self.raw_datasets["train"], new_train_samples],
                 info=original_train_dataset.info,
             )
+
+            print(extended_train_dataset)
+            print(len(extended_train_dataset))
 
             unlabeled_dataset = original_train_dataset.filter(
                 lambda s: s["idx"] not in extended_train_dataset["idx"]
