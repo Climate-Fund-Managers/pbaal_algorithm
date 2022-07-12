@@ -550,7 +550,7 @@ class TransformerWithAdapters:
             raw_datasets = self.raw_datasets.map(
                 preprocess_function,
                 batched=True,
-                load_from_cache_file=not data_args.overwrite_cache,
+                load_from_cache_file=False,
                 # if overwrite True, do not load previously cached file
             )
 
@@ -563,7 +563,7 @@ class TransformerWithAdapters:
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_train_samples is not None:
                 train_dataset = train_dataset.select(range(data_args.max_train_samples))
-
+        print(f"Max train samples FUCK YOU {data_args.max_train_samples}")
         # set evaluation dataset
         if training_args.do_eval:
             if "validation_matched" not in raw_datasets:

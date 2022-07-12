@@ -16,9 +16,9 @@ idna==3.3
 joblib==1.1.0
 multidict==6.0.2
 multiprocess==0.70.13
-numpy==1.23.1
+numpy
 packaging==21.3
-pandas==1.4.3
+pandas
 pyarrow==8.0.0
 pyparsing==3.0.9
 python-dateutil==2.8.2
@@ -28,7 +28,7 @@ regex==2022.7.9
 requests==2.28.1
 responses==0.18.0
 sacremoses==0.0.53
-scipy==1.8.1
+scipy
 six==1.16.0
 tokenizers==0.12.1
 torch==1.12.0
