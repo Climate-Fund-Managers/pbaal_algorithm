@@ -255,7 +255,6 @@ class TransformerWithAdapters:
     def run_active_learning(self):
         self.logger.info("ACTIVE LEARNING INITIATED")
         original_train_dataset = self.raw_datasets["train"]
-        print(f"Original train dataset length: {len(original_train_dataset)}")
         train_dataset = original_train_dataset.select(
             random.sample(
                 range(original_train_dataset.num_rows),
@@ -351,7 +350,7 @@ class TransformerWithAdapters:
                       'prediction': results['mean']}).to_csv(self.result_location+'predictions.csv')
 
 
-    def __pool_based_learning(self, raw_datsets,original_train_dataset, unlabeled_dataset):
+    def __pool_based_learning(self, raw_datasets,original_train_dataset, unlabeled_dataset):
         print("Pool based learning invoked")
         print(len(raw_datasets["train"]))
         current_score = -1
@@ -407,8 +406,7 @@ class TransformerWithAdapters:
         samples_entropy = torch.from_numpy(samples_entropy)
         return samples_entropy
 
-    def __train(self,raw_datsets):
-        global train_dataset
+    def __train(self,raw_datasets):
         parser = HfArgumentParser(
             (ModelArguments, DataTrainingArguments, TrainingArguments))
 
