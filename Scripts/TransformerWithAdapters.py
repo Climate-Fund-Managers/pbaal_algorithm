@@ -276,6 +276,7 @@ class TransformerWithAdapters:
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
     def __query_by_committee(self, original_train_dataset, unlabeled_dataset):
+        print("Query by comitte invoked")
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
@@ -288,7 +289,9 @@ class TransformerWithAdapters:
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
                 evaluation_metrics, test_predictions = self.__train()
+                print(test_predictions)
                 results[model] = test_predictions
+                
 
             results['variance'] = results.var(axis=1)
 
@@ -326,6 +329,7 @@ class TransformerWithAdapters:
 
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
+        print("Pool based learning invoked")
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
