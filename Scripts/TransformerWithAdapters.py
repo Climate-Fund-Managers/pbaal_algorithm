@@ -4,7 +4,8 @@ import random
 import sys
 import time
 from dataclasses import dataclass, field
-from typing import Optional
+from functools import wraps
+from typing import Dict, Optional
 
 import datasets
 import numpy as np
@@ -133,21 +134,48 @@ class AdapterDropTrainerCallback(TrainerCallback):
 class TransformerWithAdapters:
     # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
 
+    def _save_path(init):
+        ts = time.time()
+        @wraps(init)
+        def wrapper(self,args: Dict):
+            """
+            Wrapper function to return the correct path name for saving models - to be used around constructor
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            first_model = args['list_of_models'][0]
+            if args["pool_based_learning"]:
+                unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
+            elif args["query_by_committee"]:
+                unique_results_identifier = f"{first_model}/active_query_comittee/{ts}"
+            else: 
+                unique_results_identifier = f"{first_model}/non_active/{ts}"
+            args["unique_results_identifier"] = unique_results_identifier
+            init(self,args)
+        return wrapper
+
+    def _set_initial_model(init):
+        @wraps(init)
+        def wrapper(self,args:Dict):
+            """
+            Wrapper function to set the correct initial model
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            list_of_models = args["list_of_models"]
+            if list_of_models:
+                args['model_name_or_path'] = list_of_models[0]
+            init(self,args)
+        return wrapper
+
+    @_save_path
+    @_set_initial_model
     def __init__(self, args):
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
         self.logger = logging.getLogger(__name__)
 
         random.seed(args['random_seed'])
-
-        ts = time.time()
-
-        if args["pool_based_learning"]:
-            unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
-        elif args["query_by_committee"]:
-            unique_results_identifier = f"{args['list_of_models'][0]}/active_query_comittee/{ts}"
-        else: 
-            unique_results_identifier = f"{args['list_of_models'][0]}/non_active/{ts}"
 
         self.hf_args = {
             "model_name_or_path": args['model_name_or_path'],
@@ -159,7 +187,7 @@ class TransformerWithAdapters:
             "per_device_eval_batch_size": args['per_device_eval_batch_size'],
             "learning_rate": args['learning_rate'],
             "overwrite_output_dir": args['overwrite_output_dir'],
-            "output_dir": f"{args['output_dir']}/{unique_results_identifier}/" ,
+            "output_dir": f"{args['output_dir']}/{args['unique_results_identifier']}/" ,
             "logging_strategy": args['logging_strategy'],
             "logging_steps": args['logging_steps'],
             "evaluation_strategy": args['evaluation_strategy'],
@@ -220,10 +248,44 @@ class TransformerWithAdapters:
         self.query_samples_count = args['query_samples_count']
         self.do_ratio = args['do_ratio']
         self.query_samples_ratio = args['query_samples_ratio']
-        self.result_location = f"{args['result_location']}/{unique_results_identifier}/"
+        self.result_location = f"{args['result_location']}/{args['unique_results_identifier']}/"
         self.pool_based_learning = args['pool_based_learning']
         self.query_by_committee = args['query_by_committee']
         self.list_of_models = args['list_of_models']
+        print(args["unique_results_identifier"])
+
+    def _save_path(func):
+        ts = time.time()
+        @wraps(func)
+        def wrapper(self,args: Dict):
+            """
+            Wrapper function to return the correct path name for saving models - to be used around constructor
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            first_model = args['list_of_models'][0]
+            if args["pool_based_learning"]:
+                unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
+            elif args["query_by_committee"]:
+                unique_results_identifier = f"{first_model}/active_query_comittee/{ts}"
+            else: 
+                unique_results_identifier = f"{first_model}/non_active/{ts}"
+            args["unique_results_identifier"] = unique_results_identifier
+            return func(self,args)
+
+    def _set_initial_model(func):
+        @wraps(func)
+        def wrapper(self,args:Dict):
+            """
+            Wrapper function to set the correct initial model
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            list_of_models = args["list_of_models"]
+            if list_of_models:
+                args['model_name_or_path'] = list_of_models[0]
+            return func(self,args)
+                
 
     def run_majority_vote(self):
         self.logger.info("MAJORITY VOTE LEARNING INITIATED")
