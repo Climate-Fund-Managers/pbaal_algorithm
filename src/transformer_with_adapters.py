@@ -134,6 +134,7 @@ class TransformerWithAdapters:
         self.pool_based_learning = args['pool_based_learning']
         self.query_by_committee = args['query_by_committee']
         self.list_of_models = args['list_of_models']
+        print(args["unique_results_identifier"])
 
     def run_majority_vote(self):
         self.logger.info("MAJORITY VOTE LEARNING INITIATED")
