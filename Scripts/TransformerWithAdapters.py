@@ -134,9 +134,9 @@ class AdapterDropTrainerCallback(TrainerCallback):
 class TransformerWithAdapters:
     # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
 
-    def _save_path(func):
+    def _save_path(init):
         ts = time.time()
-        @wraps(func)
+        @wraps(init)
         def wrapper(self,args: Dict):
             """
             Wrapper function to return the correct path name for saving models - to be used around constructor
@@ -151,10 +151,11 @@ class TransformerWithAdapters:
             else: 
                 unique_results_identifier = f"{first_model}/non_active/{ts}"
             args["unique_results_identifier"] = unique_results_identifier
-            return func(self,args)
+            init(self,args)
+        return wrapper
 
-    def _set_initial_model(func):
-        @wraps(func)
+    def _set_initial_model(init):
+        @wraps(init)
         def wrapper(self,args:Dict):
             """
             Wrapper function to set the correct initial model
@@ -164,8 +165,9 @@ class TransformerWithAdapters:
             list_of_models = args["list_of_models"]
             if list_of_models:
                 args['model_name_or_path'] = list_of_models[0]
-            return func(self,args)
-            
+            init(self,args)
+        return wrapper
+
     @_save_path
     @_set_initial_model
     def __init__(self, args):
