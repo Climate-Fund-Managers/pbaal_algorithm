@@ -134,6 +134,38 @@ class AdapterDropTrainerCallback(TrainerCallback):
 class TransformerWithAdapters:
     # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
 
+    def _save_path(func):
+        ts = time.time()
+        @wraps(func)
+        def wrapper(self,args: Dict):
+            """
+            Wrapper function to return the correct path name for saving models - to be used around constructor
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            first_model = args['list_of_models'][0]
+            if args["pool_based_learning"]:
+                unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
+            elif args["query_by_committee"]:
+                unique_results_identifier = f"{first_model}/active_query_comittee/{ts}"
+            else: 
+                unique_results_identifier = f"{first_model}/non_active/{ts}"
+            args["unique_results_identifier"] = unique_results_identifier
+            return func(self,args)
+
+    def _set_initial_model(func):
+        @wraps(func)
+        def wrapper(self,args:Dict):
+            """
+            Wrapper function to set the correct initial model
+            Arguments:
+                args(Dict): Arguments dictionary as read from yaml file for all models
+            """
+            list_of_models = args["list_of_models"]
+            if list_of_models:
+                args['model_name_or_path'] = list_of_models[0]
+            return func(self,args)
+            
     @_save_path
     @_set_initial_model
     def __init__(self, args):
@@ -252,9 +284,6 @@ class TransformerWithAdapters:
                 args['model_name_or_path'] = list_of_models[0]
             return func(self,args)
                 
-
-
-
 
     def run_majority_vote(self):
         self.logger.info("MAJORITY VOTE LEARNING INITIATED")
