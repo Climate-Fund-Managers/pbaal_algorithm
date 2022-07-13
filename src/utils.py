@@ -6,7 +6,7 @@ from typing import Dict
 def save_path(init):
     ts = time.time()
     @wraps(init)
-    def wrapper(args: Dict):
+    def wrapper(self,args: Dict):
         """
         Wrapper function to return the correct path name for saving models - to be used around constructor
         Arguments:
@@ -20,12 +20,12 @@ def save_path(init):
         else: 
             unique_results_identifier = f"{first_model}/non_active/{ts}"
         args["unique_results_identifier"] = unique_results_identifier
-        init(args)
+        init(self,args)
     return wrapper
 
 def set_initial_model(init):
     @wraps(init)
-    def wrapper(args:Dict):
+    def wrapper(self,args:Dict):
         """
         Wrapper function to set the correct initial model
         Arguments:
@@ -34,5 +34,5 @@ def set_initial_model(init):
         list_of_models = args["list_of_models"]
         if list_of_models:
             args['model_name_or_path'] = list_of_models[0]
-        init(args)
+        init(self,args)
     return wrapper
