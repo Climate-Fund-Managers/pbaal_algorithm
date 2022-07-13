@@ -204,9 +204,9 @@ class TransformerWithAdapters:
             results['variance'] = results.var(axis=1)
 
             if self.do_query:
-                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+                idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
             if self.do_ratio:
-                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+                idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
 
             results['mean'] = results.mean(axis=1)
             results.round({'mean': 0})
@@ -615,15 +615,3 @@ class TransformerWithAdapters:
 
         return evaluation_metrics, test_predictions
 
-
-if __name__ == "__main__":
-    file_location = sys.argv[1]
-
-    with open(file_location) as f:
-        arguments = yaml.safe_load(f)
-
-    train_transformer = TransformerWithAdapters(arguments)
-    if arguments['run_active_learning']:
-        train_transformer.run_active_learning()
-    else:
-        train_transformer.run_standard_learning()
