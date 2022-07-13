@@ -135,6 +135,7 @@ class TransformerWithAdapters:
     # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
 
     @_save_path
+    @_set_initial_model
     def __init__(self, args):
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
