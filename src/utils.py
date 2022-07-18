@@ -15,7 +15,7 @@ def save_path(init):
         Arguments:
             args(Dict): Arguments dictionary as read from yaml file for all models
         """
-        if args["run_active_learning"]:
+        if not args["run_active_learning"]:
             if not args['list_of_models']:
                 unique_results_identifier = f"{args['model_name_or_path']}/non_active_one_model/{ts}"
             else:
