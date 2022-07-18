@@ -23,7 +23,7 @@ def save_path(init):
         else:
             if args["pool_based_learning"]:
                 unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
-            elif args["query_by_committee"]:
+            else: 
                 unique_results_identifier = f"{args['list_of_models'][0]}/active_query_comittee/{ts}"
         
         args["unique_results_identifier"] = unique_results_identifier
