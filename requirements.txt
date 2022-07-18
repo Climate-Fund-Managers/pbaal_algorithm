@@ -18,7 +18,6 @@ multidict==6.0.2
 multiprocess==0.70.13
 numpy
 packaging==21.3
-pandas
 pyarrow==8.0.0
 pyparsing==3.0.9
 python-dateutil==2.8.2
