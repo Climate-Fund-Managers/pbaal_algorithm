@@ -3,8 +3,6 @@ import time
 from functools import wraps
 from typing import Dict
 
-import pandas as pd
-
 
 def save_path(init):
     ts = time.time()
@@ -46,6 +44,7 @@ def set_initial_model(init):
 
 
 def create_save_path(init):
+    pd = SingletonBase().pandas
     @wraps(init)
     def wrapper(self,args:Dict):
         directory = f"{args['result_location']}/{args['unique_results_identifier']}/"
@@ -54,3 +53,14 @@ def create_save_path(init):
         pd.DataFrame(args).to_csv(f"{directory}parameters.csv")
         init(self,args)
     return wrapper
+
+
+
+class SingletonBase:
+    def __init__(self):
+        self._modules = {}
+
+    def __getattr__(self, module_name):
+        if module_name not in self._modules:
+            self._modules[module_name] = __import__(module_name)
+        return self._modules[module_name]
