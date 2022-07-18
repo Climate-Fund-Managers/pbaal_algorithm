@@ -5,7 +5,6 @@ import sys
 
 import datasets
 import numpy as np
-import pandas as pd
 import torch
 import transformers
 import yaml
@@ -44,7 +43,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from src.model_args import ModelArguments
 from src.trainer_callback import AdapterDropTrainerCallback
 from src.training_args import DataTrainingArguments
-from src.utils import create_save_path, save_path, set_initial_model
+from src.utils import SingletonBase, create_save_path, save_path, set_initial_model
 
 
 class TransformerWithAdapters:
@@ -57,6 +56,7 @@ class TransformerWithAdapters:
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
         self.logger = logging.getLogger(__name__)
+        self.pandas_importer = SingletonBase()
 
         random.seed(args['random_seed'])
 
@@ -138,6 +138,8 @@ class TransformerWithAdapters:
         print(args["unique_results_identifier"])
 
     def run_majority_vote(self):
+        pd = self.pandas_importer.pandas
+
         self.logger.info("MAJORITY VOTE LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
@@ -155,6 +157,8 @@ class TransformerWithAdapters:
         results.DataFrame(test_predictions).to_csv(self.result_location + 'ensemble_predictions.csv')
 
     def run_standard_learning(self):
+        pd = self.pandas_importer.pandas
+
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
@@ -188,6 +192,8 @@ class TransformerWithAdapters:
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
     def __query_by_committee(self, original_train_dataset, unlabeled_dataset):
+        pd = self.pandas_importer.pandas
+
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
@@ -239,6 +245,7 @@ class TransformerWithAdapters:
 
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
+        pd = self.pandas_importer.pandas
         current_score = -1
         all_scores = {"scores": [],
                       "# of records used": []}
