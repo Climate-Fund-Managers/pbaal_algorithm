@@ -2,10 +2,6 @@ import logging
 import os
 import random
 import sys
-import time
-from dataclasses import dataclass, field
-from functools import wraps
-from typing import Dict, Optional
 
 import datasets
 import numpy as np
@@ -32,7 +28,6 @@ from transformers import (
     HfArgumentParser,
     PretrainedConfig,
     Trainer,
-    TrainerCallback,
     TrainingArguments,
     default_data_collator,
     set_seed,
@@ -46,130 +41,17 @@ from transformers.adapters import (
 )
 from transformers.trainer_utils import get_last_checkpoint
 
-
-@dataclass
-class ModelArguments:
-    """
-    Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
-
-    """
-
-    # Path to pretrained model or model identifier from huggingface.co/models
-    model_name_or_path: str = field(default=None)  # microsoft/mpnet-base
-
-    # Pretrained config name or path if not the same as model_name
-    config_name: Optional[str] = field(default=None)
-
-    # Pretrained tokenizer name or path if not the same as model_name
-    tokenizer_name: Optional[str] = field(default=None)
-
-    # Where do you want to store the pretrained models downloaded from huggingface.co
-    cache_dir: str = field(default=None)
-
-    # Whether to use one of the fast tokenizer (backed by the tokenizers' library) or not
-    use_fast_tokenizer: bool = field(default=True)
-
-    # Will use the token generated when running `transformers-cli login`
-    # (necessary to use this script with private models)
-    use_auth_token: bool = field(default=False)
-
-
-@dataclass
-class DataTrainingArguments:
-    """
-    Arguments relating to what data we are going to use in the model for
-    training and eval.
-
-    """
-    # The name of the task to train on
-    task_name: str = field(default='mnli')
-
-    # The maximum total input sequence length after tokenization
-    max_seq_length: int = field(default=512)  # this in line with mpnet
-
-    # Whether to overwrite the cached preprocessed datasets
-    overwrite_cache: bool = field(default=False)
-
-    # Whether to pad all samples to max_seq_length
-    pad_to_max_length: bool = field(default=True)
-
-    # For debugging purposes or quicker training, truncate the number of
-    # training examples to this value if set
-    max_train_samples: Optional[int] = field(default=None)
-
-    # For debugging purposes or quicker training, truncate the number of
-    # evaluation examples to this value if set
-    max_eval_samples: Optional[int] = field(default=None)
-
-    # For debugging purposes or quicker training, truncate the number of
-    # prediction examples to this value if set
-    max_predict_samples: Optional[int] = field(default=None)
-
-    # A csv or a json file containing the training data
-    train_file: str = field(default=None)
-
-    # A csv or a json file containing the validation data
-    validation_file: str = field(default=None)
-
-    # A csv or a json file containing the test data
-    test_file: str = field(default=None)
-
-
-class AdapterDropTrainerCallback(TrainerCallback):
-
-    def __init__(self, adapter_name):
-        self.adapter_name = adapter_name
-
-    def on_step_begin(self, args, state, control, **kwargs):
-        skip_layers = list(range(np.random.randint(0, 11)))  # TO CHANGE
-        kwargs['model'].set_active_adapters(self.adapter_name, skip_layers=skip_layers)
-
-    def on_evaluate(self, args, state, control, **kwargs):
-        # Deactivate skipping layers during evaluation (otherwise it would use the
-        # previous randomly chosen skip_layers and thus yield results not comparable
-        # across different epochs)
-        kwargs['model'].set_active_adapters(self.adapter_name, skip_layers=None)
+from src.model_args import ModelArguments
+from src.trainer_callback import AdapterDropTrainerCallback
+from src.training_args import DataTrainingArguments
+from src.utils import save_path, set_initial_model
 
 
 class TransformerWithAdapters:
     # To dynamically drop adapter layers during training, we make use of HuggingFace's `TrainerCallback'.
 
-    def _save_path(init):
-        ts = time.time()
-        @wraps(init)
-        def wrapper(self,args: Dict):
-            """
-            Wrapper function to return the correct path name for saving models - to be used around constructor
-            Arguments:
-                args(Dict): Arguments dictionary as read from yaml file for all models
-            """
-            first_model = args['list_of_models'][0]
-            if args["pool_based_learning"]:
-                unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
-            elif args["query_by_committee"]:
-                unique_results_identifier = f"{first_model}/active_query_comittee/{ts}"
-            else: 
-                unique_results_identifier = f"{first_model}/non_active/{ts}"
-            args["unique_results_identifier"] = unique_results_identifier
-            init(self,args)
-        return wrapper
-
-    def _set_initial_model(init):
-        @wraps(init)
-        def wrapper(self,args:Dict):
-            """
-            Wrapper function to set the correct initial model
-            Arguments:
-                args(Dict): Arguments dictionary as read from yaml file for all models
-            """
-            list_of_models = args["list_of_models"]
-            if list_of_models:
-                args['model_name_or_path'] = list_of_models[0]
-            init(self,args)
-        return wrapper
-
-    @_save_path
-    @_set_initial_model
+    @save_path
+    @set_initial_model
     def __init__(self, args):
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
@@ -254,39 +136,6 @@ class TransformerWithAdapters:
         self.list_of_models = args['list_of_models']
         print(args["unique_results_identifier"])
 
-    def _save_path(func):
-        ts = time.time()
-        @wraps(func)
-        def wrapper(self,args: Dict):
-            """
-            Wrapper function to return the correct path name for saving models - to be used around constructor
-            Arguments:
-                args(Dict): Arguments dictionary as read from yaml file for all models
-            """
-            first_model = args['list_of_models'][0]
-            if args["pool_based_learning"]:
-                unique_results_identifier = f"{args['model_name_or_path']}/active_pool_based/{ts}"
-            elif args["query_by_committee"]:
-                unique_results_identifier = f"{first_model}/active_query_comittee/{ts}"
-            else: 
-                unique_results_identifier = f"{first_model}/non_active/{ts}"
-            args["unique_results_identifier"] = unique_results_identifier
-            return func(self,args)
-
-    def _set_initial_model(func):
-        @wraps(func)
-        def wrapper(self,args:Dict):
-            """
-            Wrapper function to set the correct initial model
-            Arguments:
-                args(Dict): Arguments dictionary as read from yaml file for all models
-            """
-            list_of_models = args["list_of_models"]
-            if list_of_models:
-                args['model_name_or_path'] = list_of_models[0]
-            return func(self,args)
-                
-
     def run_majority_vote(self):
         self.logger.info("MAJORITY VOTE LEARNING INITIATED")
         self.hf_args["do_predict"] = True
@@ -308,7 +157,7 @@ class TransformerWithAdapters:
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        evaluation_metrics, test_predictions = self.__train()
+        _, test_predictions = self.__train()
         pd.DataFrame(test_predictions).to_csv(self.result_location+'predictions.csv')
 
     def run_active_learning(self):
@@ -349,15 +198,16 @@ class TransformerWithAdapters:
 
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
-                evaluation_metrics, test_predictions = self.__train()
-                results[model] = test_predictions
+                _, test_predictions = self.__train()
+                print(f"Results to write to series: \n{torch.argmax(torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions)),dim = 1)}")
+                results[model] = torch.argmax(torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions)),dim = 1)
 
             results['variance'] = results.var(axis=1)
 
             if self.do_query:
-                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+                idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
             if self.do_ratio:
-                idxs = results['average'].nlargest(self.query_samples_count).index.tolist()
+                idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
 
             results['mean'] = results.mean(axis=1)
             results.round({'mean': 0})
@@ -766,15 +616,3 @@ class TransformerWithAdapters:
 
         return evaluation_metrics, test_predictions
 
-
-if __name__ == "__main__":
-    file_location = sys.argv[1]
-
-    with open(file_location) as f:
-        arguments = yaml.safe_load(f)
-
-    train_transformer = TransformerWithAdapters(arguments)
-    if arguments['run_active_learning']:
-        train_transformer.run_active_learning()
-    else:
-        train_transformer.run_standard_learning()
