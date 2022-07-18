@@ -1,3 +1,4 @@
+import os
 import time
 from functools import wraps
 from typing import Dict
@@ -34,5 +35,15 @@ def set_initial_model(init):
         list_of_models = args["list_of_models"]
         if list_of_models:
             args['model_name_or_path'] = list_of_models[0]
+        init(self,args)
+    return wrapper
+
+
+def create_save_path(init):
+    @wraps(init)
+    def wrapper(self,args:Dict):
+        directory = f"{args['result_location']}/{args['unique_results_identifier']}/"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         init(self,args)
     return wrapper

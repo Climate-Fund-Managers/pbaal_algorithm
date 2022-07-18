@@ -44,7 +44,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from src.model_args import ModelArguments
 from src.trainer_callback import AdapterDropTrainerCallback
 from src.training_args import DataTrainingArguments
-from src.utils import save_path, set_initial_model
+from src.utils import create_save_path, save_path, set_initial_model
 
 
 class TransformerWithAdapters:
@@ -52,6 +52,7 @@ class TransformerWithAdapters:
 
     @save_path
     @set_initial_model
+    @create_save_path
     def __init__(self, args):
 
         self.task_to_keys = {"mnli": ("premise", "hypothesis")}
