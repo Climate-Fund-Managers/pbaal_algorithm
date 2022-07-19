@@ -129,7 +129,6 @@ class TransformerWithAdapters:
         self.initial_train_dataset_size = args['initial_train_dataset_size']
         self.do_query = args['do_query']
         self.query_samples_count = args['query_samples_count']
-        self.do_ratio = args['do_ratio']
         self.query_samples_ratio = args['query_samples_ratio']
         self.result_location = f"{args['result_location']}/{args['unique_results_identifier']}/"
         self.pool_based_learning = args['pool_based_learning']
@@ -213,7 +212,7 @@ class TransformerWithAdapters:
 
             if self.do_query:
                 idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
-            if self.do_ratio:
+            else:
                 idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
 
             results['mean'] = results.mean(axis=1)
@@ -262,7 +261,7 @@ class TransformerWithAdapters:
             samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
             if self.do_query:
                 samples_entropy = torch.topk(samples_entropy_all, self.query_samples_count)
-            elif self.do_ratio:
+            else:
                 samples_entropy = torch.topk(samples_entropy_all, unlabeled_dataset.num_rows*self.query_samples_ratio)
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())

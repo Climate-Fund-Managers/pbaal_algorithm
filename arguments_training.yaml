@@ -19,10 +19,9 @@ per_device_eval_batch_size: 16
 per_device_train_batch_size: 16
 pretrained_adapter : None
 do_query: True
-query_samples_count: 256
-do_ratio: False
 pool_based_learning: True
 query_by_committee: False
+query_samples_count: 256
 query_samples_ratio: 0.1
 random_seed: 1
 remove_unused_columns: False
