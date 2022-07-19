@@ -213,7 +213,7 @@ class TransformerWithAdapters:
             if self.do_query:
                 idxs = results['variance'].nlargest(self.query_samples_count).index.tolist()
             else:
-                idxs = results['variance'].nlargest(self.query_samples_ratio).index.tolist()
+                idxs = results['variance'].nlargest(int(len(results)*self.query_samples_ratio)).index.tolist()
 
             results['mean'] = results.mean(axis=1)
             results.round({'mean': 0})
