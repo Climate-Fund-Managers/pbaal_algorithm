@@ -7,7 +7,6 @@ import datasets
 import numpy as np
 import torch
 import transformers
-import yaml
 from datasets import (
     ClassLabel,
     Features,
@@ -41,6 +40,19 @@ from transformers.adapters import (
 from transformers.trainer_utils import get_last_checkpoint
 
 from src.model_args import ModelArguments
+from src.settings import (
+    DO_EVAL,
+    DO_TRAIN,
+    EVAL_STEPS,
+    EVALUATION_STRATEGY,
+    LOGGING_STEPS,
+    LOGGING_STRATEGY,
+    RANDOM_SEED,
+    SEED,
+    TASK_NAME,
+    TYPE_FILE,
+    USE_TENSORBOARD,
+)
 from src.trainer_callback import AdapterDropTrainerCallback
 from src.training_args import DataTrainingArguments
 from src.utils import SingletonBase, create_save_path, save_path, set_initial_model
@@ -58,31 +70,31 @@ class TransformerWithAdapters:
         self.logger = logging.getLogger(__name__)
         self.pandas_importer = SingletonBase()
 
-        random.seed(args['random_seed'])
+        random.seed(RANDOM_SEED)
 
         self.hf_args = {
-            "model_name_or_path": args['model_name_or_path'],
-            "task_name": args['task_name'],
-            "do_train": args['do_train'],
-            "do_eval": args['do_eval'],
-            "max_seq_length": args['max_seq_length'],
-            "per_device_train_batch_size": args['per_device_train_batch_size'],
-            "per_device_eval_batch_size": args['per_device_eval_batch_size'],
-            "learning_rate": args['learning_rate'],
+            "model_name_or_path": args['model']['model_name_or_path'],
+            "task_name": TASK_NAME,
+            "do_train": DO_TRAIN,
+            "do_eval": DO_EVAL,
+            "max_seq_length": args['hyperparameters']['max_seq_length'],
+            "per_device_train_batch_size": args['hyperparameters']['per_device_train_batch_size'],
+            "per_device_eval_batch_size": args['hyperparameters']['per_device_eval_batch_size'],
+            "learning_rate": args['hyperparameters']['learning_rate'],
             "overwrite_output_dir": args['overwrite_output_dir'],
-            "output_dir": f"{args['output_dir']}/{args['unique_results_identifier']}/" ,
-            "logging_strategy": args['logging_strategy'],
-            "logging_steps": args['logging_steps'],
-            "evaluation_strategy": args['evaluation_strategy'],
-            "eval_steps": args['eval_steps'],
-            "seed": args['seed'],
+            "output_dir": f"{args['output']['output_dir']}/{args['unique_results_identifier']}/" ,
+            "logging_strategy": LOGGING_STRATEGY,
+            "logging_steps": LOGGING_STEPS,
+            "evaluation_strategy": EVALUATION_STRATEGY,
+            "eval_steps": EVAL_STEPS,
+            "seed": SEED,
             # The next line is important to ensure the dataset labels are properly passed to the model
-            "remove_unused_columns": args['remove_unused_columns'],
-            'num_train_epochs': args['num_train_epochs']
+            "remove_unused_columns": args['training_method']['remove_unused_columns'],
+            'num_train_epochs': args['hyperparameters']['num_train_epochs']
 
         }
 
-        if args['use_tensorboard']:
+        if USE_TENSORBOARD:
             self.hf_args.update(
                 {
                     "logging_dir": "/tmp/" + args['task_name'] + "/tensorboard",
@@ -96,14 +108,14 @@ class TransformerWithAdapters:
                                                  id=None),
                              'premise': Value(dtype='string', id=None)})
 
-        self.raw_datasets = load_dataset(args['type_file'],
-                                         data_files={'train': args['train_file'],
-                                                     'validation_matched': args['validation_file'],
-                                                     'test_matched': args['test_file']},
+        self.raw_datasets = load_dataset(TYPE_FILE,
+                                         data_files={'train': args['data']['train_file'],
+                                                     'validation_matched': args['data']['validation_file'],
+                                                     'test_matched': args['data']['test_file']},
                                          features=features,
                                          encoding='cp1252')
 
-        if not args['run_active_learning']:
+        if not args['training_method']['run_active_learning']:
             self.raw_datasets["test"] = self.raw_datasets["test_matched"]
 
         config = {'compacter': CompacterConfig(),
@@ -113,27 +125,26 @@ class TransformerWithAdapters:
                   'mam_adapter': MAMConfig()
                   }
 
-        if args['adapter_config'] == 'default':
-            self.adapter_config = config[args['adapter_name']]
+        if args["training_method"]["adapters"]['adapter_config'] == 'default':
+            self.adapter_config = config[args["training_method"]["adapters"]['adapter_name']]
 
         else:
             # TO BE ADJUSTED LATER
             pass
 
-        self.use_adapters = args['use_adapters']
-        self.use_pretrained_adapters = args['use_pretrained_adapters']
-        self.pretrained_adapter = args['pretrained_adapter']
-        self.adapter_name = args['adapter_name']
-        self.adaptive_learning = args['adaptive_learning']
-        self.target_score = args['target_score']
-        self.initial_train_dataset_size = args['initial_train_dataset_size']
-        self.do_query = args['do_query']
-        self.query_samples_count = args['query_samples_count']
-        self.query_samples_ratio = args['query_samples_ratio']
-        self.result_location = f"{args['result_location']}/{args['unique_results_identifier']}/"
-        self.pool_based_learning = args['pool_based_learning']
-        self.query_by_committee = args['query_by_committee']
-        self.list_of_models = args['list_of_models']
+        self.use_adapters = args["training_method"]["adapters"]['use_adapters']
+        self.use_pretrained_adapters = args["training_method"]["adapters"]['use_pretrained_adapters']
+        self.pretrained_adapter = args["training_method"]["adapters"]['pretrained_adapter']
+        self.adapter_name = args["training_method"]["adapters"]['adapter_name']
+        self.adaptive_learning = args["training_method"]["adapters"]['adaptive_learning']
+        self.target_score = args["training_method"]['target_score']
+        self.initial_train_dataset_size = args['hyperparameters']['initial_train_dataset_size']
+        self.do_query = args["training_method"]['do_query']
+        self.query_samples_count = args["training_method"]['query_samples_count']
+        self.query_samples_ratio = args["training_method"]['query_samples_ratio']
+        self.result_location = f"{args['output']['result_location']}/{args['unique_results_identifier']}/"
+        self.type = args["training_method"]["type"]
+        self.list_of_models = args["model"]['list_of_models']
         print(args["unique_results_identifier"])
 
     def run_majority_vote(self):
@@ -185,9 +196,9 @@ class TransformerWithAdapters:
 
         self.hf_args["do_predict"] = True
 
-        if self.pool_based_learning:
+        if self.type == "pool_based_learning":
             self.__pool_based_learning(original_train_dataset, unlabeled_dataset)
-        elif self.query_by_committee:
+        elif self.type == "query_by_committee":
             self.__query_by_committee(original_train_dataset, unlabeled_dataset)
 
     def __query_by_committee(self, original_train_dataset, unlabeled_dataset):
