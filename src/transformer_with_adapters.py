@@ -81,7 +81,7 @@ class TransformerWithAdapters:
             "per_device_train_batch_size": args['hyperparameters']['per_device_train_batch_size'],
             "per_device_eval_batch_size": args['hyperparameters']['per_device_eval_batch_size'],
             "learning_rate": args['hyperparameters']['learning_rate'],
-            "overwrite_output_dir": args['overwrite_output_dir'],
+            "overwrite_output_dir": args['output']['overwrite_output_dir'],
             "output_dir": f"{args['output']['output_dir']}/{args['unique_results_identifier']}/" ,
             "logging_strategy": LOGGING_STRATEGY,
             "logging_steps": LOGGING_STEPS,
