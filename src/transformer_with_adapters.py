@@ -291,6 +291,7 @@ class TransformerWithAdapters:
         test_predictions = self.__get_predictions(test_predictions)
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
+        print(f'Test length: {len(unlabeled_dataset)}, Predictions length: {len(test_predictions)}')
         pd.DataFrame({'idx': unlabeled_dataset['idx'],
                       'prediction': test_predictions}).to_csv(self.result_location+'predictions.csv')
 
