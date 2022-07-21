@@ -1,40 +1,48 @@
-adapter_config: default
-adapter_name: mam_adapter
-adaptive_learning: False
-do_eval: True
-do_train: True
-eval_steps: 100
-evaluation_strategy: steps
-initial_train_dataset_size: 0.3
-learning_rate: 0.00004
-list_of_models: []
-logging_steps: 100
-logging_strategy: steps
-max_seq_length: 512
-model_name_or_path: climatebert/distilroberta-base-climate-f
-num_train_epochs: 7
-output_dir: /content/tmp/
-overwrite_output_dir: True
-per_device_eval_batch_size: 16
-per_device_train_batch_size: 16
-pretrained_adapter : None
-do_query: True
-query_samples_count: 256
-do_ratio: False
-pool_based_learning: True
-query_by_committee: False
-query_samples_ratio: 0.1
-random_seed: 1
-remove_unused_columns: False
-result_location: content/results/
-run_active_learning: True
-seed: 12
-target_score: 0.9
-task_name: mnli
-test_file: /content/Rio_Marker_Tool/data/test.csv
-train_file: /content/Rio_Marker_Tool/data/train.csv
-type_file: csv
-use_adapters: True
-use_pretrained_adapters: False
-use_tensorboard: True
-validation_file: /content/Rio_Marker_Tool/data/valid.csv
+hyperparameters:
+  max_seq_length: 512
+  learning_rate: 0.00004
+  initial_train_dataset_size: 0.3
+  per_device_eval_batch_size: 16
+  per_device_train_batch_size: 16
+  num_train_epochs: 7
+
+model:
+  multi_model : True
+  model_name_or_path: climatebert/distilroberta-base-climate-f
+  list_of_models: []
+
+data:
+  test_file: /content/Rio_Marker_Tool/data/test.csv
+  train_file: /content/Rio_Marker_Tool/data/train.csv
+  validation_file: /content/Rio_Marker_Tool/data/valid.csv
+
+training_method:
+  run_active_learning: True
+  type: pool_based_learning #query_by_committee
+
+  do_query: True
+  query_samples_count: 256
+  query_samples_ratio: 0.1
+
+  remove_unused_columns: False
+  
+  adapters:
+    adapter_config: default
+    adapter_name: mam_adapter
+    adaptive_learning: False
+    pretrained_adapter : None
+    use_adapters: True
+    use_pretrained_adapters: False
+  
+  target_score: 0.9
+
+
+
+output:
+  output_dir: /content/tmp/ 
+  result_location: content/results/
+  overwrite_output_dir: True
+
+
+
+

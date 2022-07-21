@@ -11,7 +11,7 @@ if __name__ == "__main__":
         arguments = yaml.safe_load(f)
 
     train_transformer = TransformerWithAdapters(arguments)
-    if arguments['run_active_learning']:
+    if arguments['training_method']['run_active_learning']:
         train_transformer.run_active_learning()
     else:
         train_transformer.run_standard_learning()
