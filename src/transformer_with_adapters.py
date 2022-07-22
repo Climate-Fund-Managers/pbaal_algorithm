@@ -288,10 +288,10 @@ class TransformerWithAdapters:
             self.raw_datasets["train"] = extended_train_dataset
             self.raw_datasets["test"] = unlabeled_dataset
 
-        test_predictions = self.__get_predictions(test_predictions)
+        #test_predictions = self.__get_predictions(test_predictions)
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
-        print(f'Test length: {len(unlabeled_dataset)}, Predictions length: {len(test_predictions)}')
+        print(f'Test length: {len(unlabeled_dataset)}, Predictions length: {test_predictions.shape}')
         pd.DataFrame({'idx': unlabeled_dataset['idx'],
                       'prediction': test_predictions}).to_csv(self.result_location+'predictions.csv')
 
