@@ -267,9 +267,7 @@ class TransformerWithAdapters:
             current_score = evaluation_metrics["eval_accuracy"]
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
-            print(f"Unlabeled size: {len(unlabeled_dataset['idx'])}, Predictions size: {len(test_predictions)}")
-            #pd.DataFrame({'idx': unlabeled_dataset['idx'],
-            #          'prediction': test_predictions}).to_csv(self.result_location+'predictions.csv')
+
             samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
             if self.do_query:
                 samples_entropy = torch.topk(samples_entropy_all, self.query_samples_count)
@@ -277,7 +275,7 @@ class TransformerWithAdapters:
                 samples_entropy = torch.topk(samples_entropy_all, int(unlabeled_dataset.num_rows*self.query_samples_ratio))
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
-
+            
             extended_train_dataset = concatenate_datasets(
                 [self.raw_datasets["train"], new_train_samples],
                 info=original_train_dataset.info,
@@ -290,7 +288,7 @@ class TransformerWithAdapters:
             self.raw_datasets["train"] = extended_train_dataset
             self.raw_datasets["test"] = unlabeled_dataset
 
-        #test_predictions = self.__get_predictions(test_predictions)
+        test_predictions = self.__get_predictions(test_predictions)
 
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
         
