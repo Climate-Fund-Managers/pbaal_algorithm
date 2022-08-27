@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -172,7 +173,10 @@ class TransformerWithAdapters:
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        _, test_predictions = self.__train()
+        evaluation_metrics, test_predictions = self.__train()
+
+        with open(self.result_location+'evaluation_metrics.json','w') as f:
+            json.dump(evaluation_metrics, f)
         pd.DataFrame(test_predictions).to_csv(self.result_location+'predictions.csv')
 
     def run_active_learning(self):
@@ -275,7 +279,7 @@ class TransformerWithAdapters:
                 samples_entropy = torch.topk(samples_entropy_all, int(unlabeled_dataset.num_rows*self.query_samples_ratio))
 
             new_train_samples = unlabeled_dataset.select(samples_entropy.indices.tolist())
-            
+
             extended_train_dataset = concatenate_datasets(
                 [self.raw_datasets["train"], new_train_samples],
                 info=original_train_dataset.info,
