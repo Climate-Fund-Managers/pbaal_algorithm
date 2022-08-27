@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -172,7 +173,10 @@ class TransformerWithAdapters:
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        _, test_predictions = self.__train()
+        evaluation_metrics, test_predictions = self.__train()
+
+        with open(self.result_location+'evaluation_metrics.json','w') as f:
+            json.dump(evaluation_metrics, f)
         pd.DataFrame(test_predictions).to_csv(self.result_location+'predictions.csv')
 
     def run_active_learning(self):
@@ -216,8 +220,7 @@ class TransformerWithAdapters:
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
                 _, test_predictions = self.__train()
-                print(f"Results to write to series: \n{torch.argmax(torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions)),dim = 1)}")
-                results[model] = torch.argmax(torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions)),dim = 1)
+                results[model] = self.__get_predictions(test_predictions)
 
             results['variance'] = results.var(axis=1)
 
@@ -289,9 +292,20 @@ class TransformerWithAdapters:
             self.raw_datasets["train"] = extended_train_dataset
             self.raw_datasets["test"] = unlabeled_dataset
 
+        test_predictions = self.__get_predictions(test_predictions)
+
         pd.DataFrame(all_scores).to_csv(self.result_location+'scores_per_run.csv')
-        pd.DataFrame({'idx': unlabeled_dataset['idx'],
-                      'prediction': test_predictions}).to_csv(self.result_location+'predictions.csv')
+        
+
+    def __get_predictions(self, test_predictions):
+        """
+        Function to get the prediction from an N*M dimensional array
+        Arguments:
+            test_predictions (torch.array): N*M dimensional array of predictions
+        Returns:
+            (torch.array): N dimensional array of predicted values in range of 0 to n_classes
+        """
+        return torch.argmax(torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions)),dim = 1)
 
     @staticmethod
     def __calculate_entropy(logit):

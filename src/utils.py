@@ -19,10 +19,11 @@ def save_path(init):
             else:
                 unique_results_identifier = f"{args['model']['list_of_models'][0]}/non_active_majority/{ts}"
         else:
+            adapter_type = args["training_method"]["adapters"]["adapter_name"]
             if args["training_method"]["type"]:
-                unique_results_identifier = f"{args['model']['model_name_or_path']}/active_pool_based/{ts}"
+                unique_results_identifier = f"{args['model']['model_name_or_path']}/active_pool_based/{adapter_type}/{ts}"
             else: 
-                unique_results_identifier = f"{args['model']['list_of_models'][0]}/active_query_comittee/{ts}"
+                unique_results_identifier = f"{args['model']['list_of_models'][0]}/active_query_comittee/{adapter_type}/{ts}"
         
         args["unique_results_identifier"] = unique_results_identifier
         init(self,args)
@@ -53,7 +54,6 @@ def create_save_path(init):
         pd.DataFrame(args).to_csv(f"{directory}parameters.csv")
         init(self,args)
     return wrapper
-
 
 
 class SingletonBase:
