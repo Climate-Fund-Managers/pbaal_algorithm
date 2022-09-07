@@ -1,2 +1,2 @@
 # Rio_Marker_Tool
-Description to be added
+This repository implemets P-BAAL algorithm to develop ESG scoring relating to Rio Marker Score
