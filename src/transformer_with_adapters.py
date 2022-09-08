@@ -507,7 +507,6 @@ class TransformerWithAdapters:
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_train_samples is not None:
                 train_dataset = train_dataset.select(range(data_args.max_train_samples))
-        print(f"Max train samples FUCK YOU {data_args.max_train_samples}")
         # set evaluation dataset
         if training_args.do_eval:
             if "validation_matched" not in raw_datasets:
