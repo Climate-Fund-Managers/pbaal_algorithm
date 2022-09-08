@@ -6,4 +6,4 @@ To develop the algorithm, we utilised as a base code a training function for tra
 
 ## Additonal Information
 * Please make sure you have the right libraries installed to run the program by running the command `pip install -r ./requirements.txt`
-* To see an example of how to train a model with P-BAAL, navigate to file example.ipynb
+* To see an example of how to train a model with P-BAAL, navigate to file `example.ipynb`
