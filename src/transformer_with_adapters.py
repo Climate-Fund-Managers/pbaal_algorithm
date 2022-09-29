@@ -220,7 +220,7 @@ class TransformerWithAdapters:
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
                 _, test_predictions = self.__train()
-                results[model] = self.__get_predictions(test_predictions)
+                results[model] = torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions))[0]
 
             results['variance'] = results.var(axis=1)
 
@@ -229,10 +229,10 @@ class TransformerWithAdapters:
             else:
                 idxs = results['variance'].nlargest(int(len(results)*self.query_samples_ratio)).index.tolist()
 
-            results['mean'] = results.mean(axis=1)
-            results.round({'mean': 0})
+            results['mean'] = results[self.list_of_models].mean(axis=1)
+            results["predicted"] = np.where(results["mean"]>0.5,0,1)
             results['truth'] = unlabeled_dataset['label']
-            results['score'] = results['truth'] == results['mean'] 
+            results['score'] = results['truth'] == results['predicted'] 
             current_score = results['score'].mean()
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
@@ -253,8 +253,8 @@ class TransformerWithAdapters:
 
         # change, using wrong dataset
         pd.DataFrame(all_scores).to_csv(self.result_location + 'scores_per_run.csv')
-        pd.DataFrame({'idx': unlabeled_dataset['idx'],
-                      'prediction': results['mean']}).to_csv(self.result_location+'predictions.csv')
+        pd.DataFrame({'label': results['truth'],
+                      'prediction': results['prediction']}).to_csv(self.result_location+'predictions.csv')
 
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
