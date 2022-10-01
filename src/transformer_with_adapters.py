@@ -158,13 +158,16 @@ class TransformerWithAdapters:
         results= pd.DataFrame()
         for model in self.list_of_models:
             self.hf_args['model_name_or_path'] = model
-            evaluation_metrics, test_predictions = self.__train()
-            results[model] = test_predictions
+            evaluation_metrics, test_predictions,eval_predictions = self.__train()
+            results[model] = torch.nn.Softmax(dim=1)(torch.from_numpy(eval_predictions))[:,0]
 
         results['mean'] = results.mean(axis=1)
-        results.round({'mean': 0})
+        results["predicted"] = np.where(results["mean"] > 0.5,0,1)
         results['truth'] = self.raw_datasets['test_matched']['label']
-        results['score'] = results['truth'] == results['mean']
+        results['score'] = results['truth'] == results['predicted']
+
+        with open(self.result_location+'score.json','w') as f:
+            json.dump({"score":results["score"].mean()}, f)
         results.DataFrame(test_predictions).to_csv(self.result_location + 'ensemble_predictions.csv')
 
     def run_standard_learning(self):
@@ -173,7 +176,7 @@ class TransformerWithAdapters:
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        evaluation_metrics, test_predictions = self.__train()
+        evaluation_metrics, test_predictions,_ = self.__train()
 
         with open(self.result_location+'evaluation_metrics.json','w') as f:
             json.dump(evaluation_metrics, f)
@@ -216,10 +219,12 @@ class TransformerWithAdapters:
 
             self.logger.info(f'Query by committee training using {self.raw_datasets["train"].num_rows}')
             results = pd.DataFrame()
-
+            eval_results = pd.DataFrame()
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
-                _, test_predictions = self.__train()
+                _, test_predictions,eval_predictions = self.__train()
+
+                eval_results[model] = torch.nn.Softmax(dim=1)(torch.from_numpy(eval_predictions))[:,0]
                 results[model] = torch.nn.Softmax(dim=1)(torch.from_numpy(test_predictions))[:,0]
 
             results['variance'] = results.var(axis=1)
@@ -229,11 +234,11 @@ class TransformerWithAdapters:
             else:
                 idxs = results['variance'].nlargest(int(len(results)*self.query_samples_ratio)).index.tolist()
 
-            results['mean'] = results[self.list_of_models].mean(axis=1)
-            results["predicted"] = np.where(results["mean"]>0.5,0,1)
-            results['truth'] = unlabeled_dataset['label']
-            results['score'] = results['truth'] == results['predicted'] 
-            current_score = results['score'].mean()
+            eval_results['mean'] = eval_results.mean(axis=1)
+            eval_results["predicted"] = np.where(eval_results["mean"]>0.5,0,1)
+            eval_results['truth'] = self.raw_datasets["validation_matched"]['label']
+            eval_results['score'] = eval_results['truth'] == eval_results['predicted'] 
+            current_score = eval_results['score'].mean()
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
 
@@ -253,8 +258,8 @@ class TransformerWithAdapters:
 
         # change, using wrong dataset
         pd.DataFrame(all_scores).to_csv(self.result_location + 'scores_per_run.csv')
-        pd.DataFrame({'label': results['truth'],
-                      'prediction': results['prediction']}).to_csv(self.result_location+'predictions.csv')
+        pd.DataFrame({'label': eval_results['truth'],
+                      'predicted': eval_results['predicted']}).to_csv(self.result_location+'predictions.csv')
 
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
@@ -267,7 +272,7 @@ class TransformerWithAdapters:
 
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
-            evaluation_metrics, test_predictions = self.__train()
+            evaluation_metrics, test_predictions,_ = self.__train()
             current_score = evaluation_metrics["eval_accuracy"]
             all_scores['scores'].append(current_score)
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
@@ -616,6 +621,9 @@ class TransformerWithAdapters:
 
             for eval_dataset, task in zip(eval_datasets, tasks):
                 metrics = trainer.evaluate(eval_dataset=eval_dataset)
+                eval_predictions = trainer.predict(
+                    eval_dataset, metric_key_prefix=metrics_prefix + "_predict_metrics"
+                ).predictions
 
                 max_eval_samples = (
                     data_args.max_eval_samples  # in case we do testing with subsample
@@ -645,5 +653,5 @@ class TransformerWithAdapters:
                     predict_dataset, metric_key_prefix=metrics_prefix + "_predict_metrics"
                 ).predictions
 
-        return evaluation_metrics, test_predictions
+        return evaluation_metrics, test_predictions, eval_predictions
 
