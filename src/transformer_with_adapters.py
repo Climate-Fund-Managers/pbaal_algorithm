@@ -173,10 +173,14 @@ class TransformerWithAdapters:
         self.logger.info("STANDARD LEARNING INITIATED")
         self.hf_args["do_predict"] = True
         self.logger.info(f'Training using full dataset')
-        evaluation_metrics, test_predictions = self.__train()
+        evaluation_metrics, test_metrics, test_predictions = self.__train()
 
-        with open(self.result_location+'evaluation_metrics.json','w') as f:
+        with open(self.result_location+'evaluation_metrics.json', 'w') as f:
             json.dump(evaluation_metrics, f)
+
+        with open(self.result_location+'test_metrics.json', 'w') as f:
+            json.dump(test_metrics, f)
+
         pd.DataFrame(test_predictions).to_csv(self.result_location+'predictions.csv')
 
     def run_active_learning(self):
@@ -219,7 +223,7 @@ class TransformerWithAdapters:
 
             for model in self.list_of_models:
                 self.hf_args['model_name_or_path'] = model
-                _, test_predictions = self.__train()
+                _, _, test_predictions = self.__train()
                 results[model] = self.__get_predictions(test_predictions)
 
             results['variance'] = results.var(axis=1)
@@ -260,16 +264,21 @@ class TransformerWithAdapters:
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
         pd = self.pandas_importer.pandas
         current_score = -1
-        all_scores = {"scores": [],
+        all_scores = {"scores_eval": [],
+                      "scores_test": [],
                       "# of records used": []}
 
-        while unlabeled_dataset.num_rows > self.query_samples_count and current_score < self.target_score:
+        while unlabeled_dataset.num_rows > self.query_samples_count and current_score_eval < self.target_score:
 
             self.logger.info(f'Training using {self.raw_datasets["train"].num_rows}')
 
-            evaluation_metrics, test_predictions = self.__train()
-            current_score = evaluation_metrics["eval_accuracy"]
-            all_scores['scores'].append(current_score)
+            evaluation_metrics, test_metrics, test_predictions = self.__train()
+            current_score_eval = evaluation_metrics["eval_accuracy"]
+            all_scores['scores_eval'].append(current_score_eval)
+
+            current_score_test = test_metrics["eval_accuracy"]
+            all_scores['scores_test'].append(current_score_test)
+
             all_scores['# of records used'].append(self.raw_datasets["train"].num_rows)
 
             samples_entropy_all = TransformerWithAdapters.__calculate_entropy(test_predictions)
@@ -526,6 +535,7 @@ class TransformerWithAdapters:
                 raise ValueError("--do_predict requires a test dataset")
 
             predict_dataset = raw_datasets["test"]
+            test_dataset = raw_datasets['test_matched']
 
             # if we set limit on data to be used for testing, pick some data at random to use
             if data_args.max_predict_samples is not None:
@@ -636,6 +646,7 @@ class TransformerWithAdapters:
             # As we eval, loop to handle MNLI double evaluation (matched, mis-matched)
             tasks = [data_args.task_name]
             predict_datasets = [predict_dataset]
+            test_datasets = [test_dataset]
             tasks.append("mnli-mm")
 
             for predict_dataset, task in zip(predict_datasets, tasks):
@@ -645,5 +656,18 @@ class TransformerWithAdapters:
                     predict_dataset, metric_key_prefix=metrics_prefix + "_predict_metrics"
                 ).predictions
 
-        return evaluation_metrics, test_predictions
+            # Equally calculate metrics on test data
+            for test_dataset, task in zip(test_datasets, tasks):
+                metrics = trainer.evaluate(eval_dataset=test_dataset)
+
+                max_eval_samples = len(test_dataset)
+
+                metrics["eval_samples"] = min(max_eval_samples, len(test_dataset))
+
+                trainer.log_metrics(metrics_prefix + "eval_metrics", metrics)
+                trainer.save_metrics(metrics_prefix + "eval_metrics", metrics)
+
+                test_metrics = metrics
+
+        return evaluation_metrics, test_metrics, test_predictions
 
