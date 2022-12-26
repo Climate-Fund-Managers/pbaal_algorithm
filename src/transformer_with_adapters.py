@@ -263,7 +263,7 @@ class TransformerWithAdapters:
 
     def __pool_based_learning(self, original_train_dataset, unlabeled_dataset):
         pd = self.pandas_importer.pandas
-        current_score = -1
+        current_score_eval = -1
         all_scores = {"scores_eval": [],
                       "scores_test": [],
                       "# of records used": []}
